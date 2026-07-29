@@ -1,0 +1,786 @@
+<?php
+// views/admin/dashboard.view.php - Admin Dashboard View Template
+
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../includes/sidebar.php';
+?>
+
+<main class="app-content">
+    <div class="page-header">
+        <div>
+            <h2>Admin Control Center</h2>
+            <p>System Overview & Resource Management Portal</p>
+        </div>
+    </div>
+
+    <?php if ($flash): ?>
+        <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show mb-4" role="alert">
+            <?= e($flash['message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Overview Analytics Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2-4 col-sm-6 col-12">
+            <div class="stat-card">
+                <div class="stat-title">Total Computers</div>
+                <div class="stat-value"><?= $total_pcs ?></div>
+                <div class="stat-desc">Across <?= count($labs) ?> laboratories</div>
+            </div>
+        </div>
+        <div class="col-md-2-4 col-sm-6 col-12">
+            <div class="stat-card">
+                <div class="stat-title">Available PCs</div>
+                <div class="stat-value" style="color: #16a34a;"><?= $avail_pcs ?></div>
+                <div class="stat-desc">Ready for reservation</div>
+            </div>
+        </div>
+        <div class="col-md-2-4 col-sm-6 col-12">
+            <div class="stat-card">
+                <div class="stat-title">Under Maintenance</div>
+                <div class="stat-value" style="color: #dc2626;"><?= $maint_pcs ?></div>
+                <div class="stat-desc">Hardware/Software repair</div>
+            </div>
+        </div>
+        <div class="col-md-2-4 col-sm-6 col-12">
+            <div class="stat-card">
+                <div class="stat-title">Registered Students</div>
+                <div class="stat-value"><?= $total_students ?></div>
+                <div class="stat-desc">Active portal users</div>
+            </div>
+        </div>
+        <div class="col-md-2-4 col-sm-6 col-12">
+            <div class="stat-card">
+                <div class="stat-title">Active Bookings</div>
+                <div class="stat-value" style="color: #2563eb;"><?= $active_bookings ?></div>
+                <div class="stat-desc">Approved & Pending</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB CONTENT SECTIONS -->
+
+    <?php if ($tab === 'overview'): ?>
+        <div class="row g-3">
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <h3 class="card-title">Laboratory Status Summary</h3>
+                    <div class="table-custom-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Lab Room</th>
+                                    <th>Capacity</th>
+                                    <th>Total PCs</th>
+                                    <th>Available</th>
+                                    <th>Under Maintenance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($labs as $lab): 
+                                    $l_avail = 0; $l_maint = 0;
+                                    foreach ($computers as $c) {
+                                        if ($c['lab_id'] == $lab['lab_id']) {
+                                            if ($c['status'] === 'Available') $l_avail++;
+                                            if ($c['status'] === 'Under Maintenance') $l_maint++;
+                                        }
+                                    }
+                                ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?= e($lab['room_number']) ?></td>
+                                        <td><?= $lab['capacity'] ?> Seats</td>
+                                        <td><?= $lab['total_computers'] ?> PCs</td>
+                                        <td><span class="status-badge badge-available"><?= $l_avail ?> Available</span></td>
+                                        <td><span class="status-badge badge-maintenance"><?= $l_maint ?> In Repair</span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <h3 class="card-title">Recent System Maintenance Logs</h3>
+                    <div class="list-group list-group-flush" style="font-size: 0.85rem;">
+                        <?php 
+                        $recent = array_slice($maintenance_tickets, 0, 5);
+                        if (empty($recent)): ?>
+                            <div class="text-muted py-3">No maintenance records logged.</div>
+                        <?php else: ?>
+                            <?php foreach ($recent as $rec): ?>
+                                <div class="list-group-item px-0 border-bottom py-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark"><?= e($rec['pc_label']) ?> (<?= e($rec['room_number']) ?>)</strong>
+                                        <?= render_status_badge($rec['status']) ?>
+                                    </div>
+                                    <div class="text-muted text-truncate"><?= e($rec['issue_description']) ?></div>
+                                    <div class="text-muted" style="font-size: 0.75rem;"><?= e($rec['reported_at']) ?></div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <?php elseif ($tab === 'labs'): ?>
+        <!-- LABS MANAGEMENT -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title mb-0">Manage Laboratories</h3>
+                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addLabModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Lab Room
+                </button>
+            </div>
+
+            <div class="table-custom-container">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Lab ID</th>
+                            <th>Room Number</th>
+                            <th>Seating Capacity</th>
+                            <th>Total Computers</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($labs as $lab): ?>
+                            <tr>
+                                <td>#<?= $lab['lab_id'] ?></td>
+                                <td class="fw-semibold"><?= e($lab['room_number']) ?></td>
+                                <td><?= $lab['capacity'] ?> Seats</td>
+                                <td><?= $lab['total_computers'] ?> PCs</td>
+                                <td class="text-end">
+                                    <button class="btn btn-outline-clrp btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editLabModal<?= $lab['lab_id'] ?>">Edit</button>
+                                    <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete this lab?');">
+                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                        <input type="hidden" name="action" value="delete_lab">
+                                        <input type="hidden" name="lab_id" value="<?= $lab['lab_id'] ?>">
+                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <!-- Edit Lab Modal -->
+                            <div class="modal fade" id="editLabModal<?= $lab['lab_id'] ?>" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST">
+                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                            <input type="hidden" name="action" value="edit_lab">
+                                            <input type="hidden" name="lab_id" value="<?= $lab['lab_id'] ?>">
+                                            <div class="modal-header"><h5 class="modal-title fs-6">Edit Lab Room #<?= $lab['lab_id'] ?></h5></div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Room Number</label>
+                                                    <input type="text" name="room_number" class="form-control" value="<?= e($lab['room_number']) ?>" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Seating Capacity</label>
+                                                    <input type="number" name="capacity" class="form-control" value="<?= $lab['capacity'] ?>" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add Lab Modal -->
+        <div class="modal fade" id="addLabModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                        <input type="hidden" name="action" value="add_lab">
+                        <div class="modal-header"><h5 class="modal-title fs-6">Add New Laboratory Room</h5></div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" name="room_number" class="form-control" placeholder="e.g. Room 605" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Capacity (Seats)</label>
+                                <input type="number" name="capacity" class="form-control" value="35" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary-clrp btn-sm">Create Laboratory</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <?php elseif ($tab === 'computers'): ?>
+        <!-- COMPUTERS MANAGEMENT -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title mb-0">Manage Computer Workstations</h3>
+                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addPCModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add Computer
+                </button>
+            </div>
+
+            <div class="table-custom-container">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>PC ID</th>
+                            <th>PC Label</th>
+                            <th>Lab Room</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($computers as $pc): ?>
+                            <tr>
+                                <td>#<?= $pc['computer_id'] ?></td>
+                                <td class="fw-semibold"><?= e($pc['pc_label']) ?></td>
+                                <td><?= e($pc['room_number'] ?? 'Unassigned') ?></td>
+                                <td><code><?= e($pc['ip_address']) ?></code></td>
+                                <td><?= render_status_badge($pc['status']) ?></td>
+                                <td class="text-end">
+                                    <button class="btn btn-outline-clrp btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editPCModal<?= $pc['computer_id'] ?>">Edit</button>
+                                    <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete PC record?');">
+                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                        <input type="hidden" name="action" value="delete_computer">
+                                        <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
+                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <!-- Edit PC Modal -->
+                            <div class="modal fade" id="editPCModal<?= $pc['computer_id'] ?>" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST">
+                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                            <input type="hidden" name="action" value="edit_computer">
+                                            <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
+                                            <div class="modal-header"><h5 class="modal-title fs-6">Edit PC - <?= e($pc['pc_label']) ?></h5></div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">PC Label</label>
+                                                    <input type="text" name="pc_label" class="form-control" value="<?= e($pc['pc_label']) ?>" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">IP Address</label>
+                                                    <input type="text" name="ip_address" class="form-control" value="<?= e($pc['ip_address']) ?>">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Assigned Lab Room</label>
+                                                    <select name="lab_id" class="form-select" required>
+                                                        <?php foreach ($labs as $l): ?>
+                                                            <option value="<?= $l['lab_id'] ?>" <?= $pc['lab_id'] == $l['lab_id'] ? 'selected' : '' ?>><?= e($l['room_number']) ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Operating Status</label>
+                                                    <select name="status" class="form-select" required>
+                                                        <option value="Available" <?= $pc['status'] === 'Available' ? 'selected' : '' ?>>Available</option>
+                                                        <option value="In Use" <?= $pc['status'] === 'In Use' ? 'selected' : '' ?>>In Use</option>
+                                                        <option value="Reserved" <?= $pc['status'] === 'Reserved' ? 'selected' : '' ?>>Reserved</option>
+                                                        <option value="Under Maintenance" <?= $pc['status'] === 'Under Maintenance' ? 'selected' : '' ?>>Under Maintenance</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add PC Modal -->
+        <div class="modal fade" id="addPCModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                        <input type="hidden" name="action" value="add_computer">
+                        <div class="modal-header"><h5 class="modal-title fs-6">Add Computer Workstation</h5></div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">PC Label</label>
+                                <input type="text" name="pc_label" class="form-control" placeholder="e.g. PC-601-07" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">IP Address</label>
+                                <input type="text" name="ip_address" class="form-control" placeholder="192.168.1.125">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Lab Room</label>
+                                <select name="lab_id" class="form-select" required>
+                                    <?php foreach ($labs as $l): ?>
+                                        <option value="<?= $l['lab_id'] ?>"><?= e($l['room_number']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Initial Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="Available">Available</option>
+                                    <option value="Under Maintenance">Under Maintenance</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary-clrp btn-sm">Add Computer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <?php elseif ($tab === 'software'): ?>
+        <!-- SOFTWARE MANAGEMENT -->
+        <div class="row g-3">
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title mb-0">Software Applications Catalog</h3>
+                        <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addSoftwareModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add Software
+                        </button>
+                    </div>
+
+                    <div class="table-custom-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Software Name</th>
+                                    <th>Version</th>
+                                    <th>License Type</th>
+                                    <th>Installations</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($softwares as $sw): ?>
+                                    <tr>
+                                        <td>#<?= $sw['software_id'] ?></td>
+                                        <td class="fw-semibold"><?= e($sw['software_name']) ?></td>
+                                        <td><?= e($sw['version']) ?></td>
+                                        <td><span class="badge bg-secondary-subtle text-secondary border px-2"><?= e($sw['license_type']) ?></span></td>
+                                        <td><?= $sw['total_installations'] ?> PCs</td>
+                                        <td class="text-end">
+                                            <form action="<?= url('/admin/dashboard.php?tab=software') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete software entry?');">
+                                                <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                                <input type="hidden" name="action" value="delete_software">
+                                                <input type="hidden" name="software_id" value="<?= $sw['software_id'] ?>">
+                                                <button class="btn btn-outline-danger btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="content-card">
+                    <h3 class="card-title">Map Software to Computer</h3>
+                    <p class="text-muted" style="font-size: 0.85rem;">Link software applications to specific lab workstations.</p>
+
+                    <form action="<?= url('/admin/dashboard.php?tab=software') ?>" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                        <input type="hidden" name="action" value="link_software">
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Computer</label>
+                            <select name="computer_id" class="form-select" required>
+                                <?php foreach ($computers as $c): ?>
+                                    <option value="<?= $c['computer_id'] ?>"><?= e($c['pc_label']) ?> (<?= e($c['room_number']) ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Software</label>
+                            <select name="software_id" class="form-select" required>
+                                <?php foreach ($softwares as $s): ?>
+                                    <option value="<?= $s['software_id'] ?>"><?= e($s['software_name']) ?> (v<?= e($s['version']) ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Installation Date</label>
+                            <input type="date" name="installation_date" class="form-control" value="<?= date('Y-m-d') ?>">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-clrp w-100">
+                            Link Application to PC <i class="bi bi-link-45deg ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Software Modal -->
+        <div class="modal fade" id="addSoftwareModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="<?= url('/admin/dashboard.php?tab=software') ?>" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                        <input type="hidden" name="action" value="add_software">
+                        <div class="modal-header"><h5 class="modal-title fs-6">Add Software Package</h5></div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Software Name</label>
+                                <input type="text" name="software_name" class="form-control" placeholder="e.g. MATLAB, AutoCAD" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Version</label>
+                                <input type="text" name="version" class="form-control" placeholder="e.g. R2024a">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">License Type</label>
+                                <select name="license_type" class="form-select">
+                                    <option value="Proprietary">Proprietary</option>
+                                    <option value="Open Source">Open Source</option>
+                                    <option value="Freeware">Freeware</option>
+                                    <option value="Volume License">Volume License</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary-clrp btn-sm">Add Software</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <?php elseif ($tab === 'users'): ?>
+        <!-- USER MANAGEMENT -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title mb-0">System User Accounts</h3>
+                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="bi bi-person-plus me-1"></i> Add User Account
+                </button>
+            </div>
+
+            <!-- Student Users -->
+            <h5 class="mt-3 mb-2 fs-6 text-primary font-semibold">Student Accounts (<?= count($students_list) ?>)</h5>
+            <div class="table-custom-container mb-4">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach (array_slice($students_list, 0, 10) as $st): ?>
+                            <tr>
+                                <td class="fw-semibold"><code><?= e($st['student_id']) ?></code></td>
+                                <td><?= e($st['name']) ?></td>
+                                <td><?= e($st['email']) ?></td>
+                                <td><?= e($st['dept_name'] ?? $st['dept_id']) ?></td>
+                                <td class="text-end">
+                                    <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete student account?');">
+                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                        <input type="hidden" name="action" value="delete_user">
+                                        <input type="hidden" name="user_type" value="student">
+                                        <input type="hidden" name="id" value="<?= $st['student_id'] ?>">
+                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Technician Users -->
+            <h5 class="mt-4 mb-2 fs-6 text-primary font-semibold">Technician Accounts (<?= count($technicians) ?>)</h5>
+            <div class="table-custom-container mb-4">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Tech ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Specialization</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($technicians as $tech): ?>
+                            <tr>
+                                <td>#<?= $tech['technician_id'] ?></td>
+                                <td class="fw-semibold"><?= e($tech['name']) ?></td>
+                                <td><?= e($tech['email']) ?></td>
+                                <td><span class="badge bg-info-subtle text-info-emphasis border px-2"><?= e($tech['specialization']) ?></span></td>
+                                <td class="text-end">
+                                    <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete technician account?');">
+                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                        <input type="hidden" name="action" value="delete_user">
+                                        <input type="hidden" name="user_type" value="technician">
+                                        <input type="hidden" name="id" value="<?= $tech['technician_id'] ?>">
+                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Admin Users -->
+            <h5 class="mt-4 mb-2 fs-6 text-primary font-semibold">Administrator Accounts (<?= count($admins_list) ?>)</h5>
+            <div class="table-custom-container">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Admin ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($admins_list as $adm): ?>
+                            <tr>
+                                <td>#<?= $adm['admin_id'] ?></td>
+                                <td class="fw-semibold"><?= e($adm['name']) ?></td>
+                                <td><?= e($adm['email']) ?></td>
+                                <td class="text-end">
+                                    <?php if ($adm['admin_id'] != $user['id']): ?>
+                                        <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete admin account?');">
+                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                            <input type="hidden" name="action" value="delete_user">
+                                            <input type="hidden" name="user_type" value="admin">
+                                            <input type="hidden" name="id" value="<?= $adm['admin_id'] ?>">
+                                            <button class="btn btn-outline-danger btn-sm">Delete</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="text-muted" style="font-size: 0.8rem;">Current Account</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add User Modal -->
+        <div class="modal fade" id="addUserModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                        <input type="hidden" name="action" value="add_user">
+                        <div class="modal-header"><h5 class="modal-title fs-6">Create New User Account</h5></div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Role / Account Type</label>
+                                <select name="user_type" id="user_type_select" class="form-select" required onchange="toggleUserFields(this.value)">
+                                    <option value="student">Student</option>
+                                    <option value="technician">Technician</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3" id="student_id_group">
+                                <label class="form-label">Student ID</label>
+                                <input type="text" name="student_id" class="form-control" placeholder="e.g. 2411259999">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="name" class="form-control" required placeholder="User Full Name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" class="form-control" required placeholder="name@northsouth.edu">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" name="password" class="form-control" value="password123" required>
+                            </div>
+
+                            <div class="mb-3" id="dept_group">
+                                <label class="form-label">Department</label>
+                                <select name="dept_id" class="form-select">
+                                    <?php foreach ($departments as $d): ?>
+                                        <option value="<?= $d['dept_id'] ?>"><?= e($d['dept_id']) ?> - <?= e($d['dept_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="mb-3 d-none" id="spec_group">
+                                <label class="form-label">Specialization</label>
+                                <input type="text" name="specialization" class="form-control" placeholder="Hardware, Networking, OS...">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary-clrp btn-sm">Create User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        function toggleUserFields(val) {
+            document.getElementById('student_id_group').classList.toggle('d-none', val !== 'student');
+            document.getElementById('dept_group').classList.toggle('d-none', val !== 'student');
+            document.getElementById('spec_group').classList.toggle('d-none', val !== 'technician');
+        }
+        </script>
+
+    <?php elseif ($tab === 'reservations'): ?>
+        <!-- RESERVATION MANAGEMENT -->
+        <div class="content-card">
+            <h3 class="card-title">Student Booking Requests</h3>
+
+            <div class="table-custom-container">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Res ID</th>
+                            <th>Student Name</th>
+                            <th>Student ID</th>
+                            <th>PC Label / Room</th>
+                            <th>Date</th>
+                            <th>Time Slot</th>
+                            <th>Status</th>
+                            <th class="text-end">Approval Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($reservations as $r): ?>
+                            <tr>
+                                <td>#<?= $r['reservation_id'] ?></td>
+                                <td class="fw-semibold"><?= e($r['student_name']) ?></td>
+                                <td><code><?= e($r['student_id']) ?></code></td>
+                                <td><?= e($r['pc_label']) ?> (<?= e($r['room_number']) ?>)</td>
+                                <td><?= e($r['reservation_date']) ?></td>
+                                <td><code><?= e($r['time_slot']) ?></code></td>
+                                <td><?= render_status_badge($r['status']) ?></td>
+                                <td class="text-end">
+                                    <?php if ($r['status'] === 'Pending'): ?>
+                                        <form action="<?= url('/admin/dashboard.php?tab=reservations') ?>" method="POST" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                            <input type="hidden" name="action" value="approve_reservation">
+                                            <input type="hidden" name="reservation_id" value="<?= $r['reservation_id'] ?>">
+                                            <button type="submit" class="btn btn-success btn-sm py-1 px-2" style="font-size: 0.8rem;">
+                                                Approve <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+
+                                        <form action="<?= url('/admin/dashboard.php?tab=reservations') ?>" method="POST" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                            <input type="hidden" name="action" value="reject_reservation">
+                                            <input type="hidden" name="reservation_id" value="<?= $r['reservation_id'] ?>">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-1 px-2" style="font-size: 0.8rem;">
+                                                Reject <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="text-muted" style="font-size: 0.8rem;">Processed</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <?php elseif ($tab === 'maintenance'): ?>
+        <!-- MAINTENANCE QUEUE & TECHNICIAN ASSIGNMENT -->
+        <div class="content-card">
+            <h3 class="card-title">Maintenance Tickets & Technician Assignment</h3>
+
+            <div class="table-custom-container">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Computer / Room</th>
+                            <th>Issue Description</th>
+                            <th>Reported By</th>
+                            <th>Status</th>
+                            <th>Assigned Technician</th>
+                            <th class="text-end">Assign Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($maintenance_tickets as $m): ?>
+                            <tr>
+                                <td>#<?= $m['maintenance_id'] ?></td>
+                                <td class="fw-semibold"><?= e($m['pc_label']) ?> (<?= e($m['room_number']) ?>)</td>
+                                <td><?= e($m['issue_description']) ?></td>
+                                <td><?= e($m['student_name'] ?? 'System') ?></td>
+                                <td><?= render_status_badge($m['status']) ?></td>
+                                <td>
+                                    <span class="fw-medium text-dark"><?= e($m['tech_name'] ?? 'Unassigned') ?></span>
+                                </td>
+                                <td class="text-end">
+                                    <form action="<?= url('/admin/dashboard.php?tab=maintenance') ?>" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                                        <input type="hidden" name="action" value="assign_technician">
+                                        <input type="hidden" name="maintenance_id" value="<?= $m['maintenance_id'] ?>">
+
+                                        <select name="technician_id" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
+                                            <option value="">-- Assign Tech --</option>
+                                            <?php foreach ($technicians as $t): ?>
+                                                <option value="<?= $t['technician_id'] ?>" <?= $m['technician_id'] == $t['technician_id'] ? 'selected' : '' ?>>
+                                                    <?= e($t['name']) ?> (<?= e($t['specialization']) ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
+
+</main>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
