@@ -133,4 +133,4 @@ $stmtMyMaint->execute([$student_id]);
 $my_issues = $stmtMyMaint->fetchAll();
 
 // Render View
-require_once __DIR__ . '/../views/student/dashboard.view.php';
+require_once __DIR__ . '/../views/student/dashboard.html';

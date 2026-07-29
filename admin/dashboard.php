@@ -261,4 +261,4 @@ $maintenance_tickets = $pdo->query("
 ")->fetchAll();
 
 // Render View
-require_once __DIR__ . '/../views/admin/dashboard.view.php';
+require_once __DIR__ . '/../views/admin/dashboard.html';
