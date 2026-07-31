@@ -1,5 +1,5 @@
 <?php
-// login.php - Login Controller Logic
+// login.php - Login Controller Logic ok
 
 require_once __DIR__ . '/includes/auth.php';
 
