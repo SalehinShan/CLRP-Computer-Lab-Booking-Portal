@@ -1,6 +1,6 @@
 <?php
 $host = '127.0.0.1';
-$port = 3306;
+$port = 3308;
 $dbname = 'clrp_db';
 $username = 'root';
 $password = '';
