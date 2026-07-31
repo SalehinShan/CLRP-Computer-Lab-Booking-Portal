@@ -138,51 +138,6 @@ require_once __DIR__ . '/../../includes/sidebar.php';
                                         <?php endif; ?>
                                     </td>
                                 </tr>
-
-                                <!-- Modal for Booking -->
-                                <?php if ($pc['status'] === 'Available'): ?>
-                                    <div class="modal fade" id="reserveModal<?= $pc['computer_id'] ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <form action="<?= url('/student/dashboard.php') ?>" method="POST">
-                                                    <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                                    <input type="hidden" name="action" value="reserve">
-                                                    <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
-
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title fs-6 fw-bold">Reserve Computer - <?= e($pc['pc_label']) ?></h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Selected Computer</label>
-                                                            <input type="text" class="form-control" value="<?= e($pc['pc_label']) ?> (<?= e($pc['room_number']) ?>)" readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Reservation Date</label>
-                                                            <input type="date" name="reservation_date" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d') ?>" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Time Slot</label>
-                                                            <select name="time_slot" class="form-select" required>
-                                                                <option value="08:00 - 09:30">08:00 AM - 09:30 AM</option>
-                                                                <option value="09:40 - 11:10">09:40 AM - 11:10 AM</option>
-                                                                <option value="11:20 - 12:50">11:20 AM - 12:50 PM</option>
-                                                                <option value="01:00 - 02:30">01:00 PM - 02:30 PM</option>
-                                                                <option value="02:40 - 04:10">02:40 PM - 04:10 PM</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-primary-clrp btn-sm">Confirm Booking Request</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
@@ -323,5 +278,102 @@ require_once __DIR__ . '/../../includes/sidebar.php';
     <?php endif; ?>
 
 </main>
+
+<!-- Modals for Booking (Placed outside main container to ensure correct stacking context/z-index and avoid unclickable backdrop overlay) -->
+<?php if ($tab === 'overview' && !empty($computers)): ?>
+    <?php foreach ($computers as $pc): ?>
+        <?php if ($pc['status'] === 'Available'): ?>
+            <div class="modal fade" id="reserveModal<?= $pc['computer_id'] ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="<?= url('/student/dashboard.php') ?>" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                            <input type="hidden" name="action" value="reserve">
+                            <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title fs-6 fw-bold">Reserve Computer - <?= e($pc['pc_label']) ?></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Selected Computer</label>
+                                    <input type="text" class="form-control" value="<?= e($pc['pc_label']) ?> (<?= e($pc['room_number']) ?>)" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Reservation Date</label>
+                                    <input type="date" name="reservation_date" id="reservation_date_<?= $pc['computer_id'] ?>" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d') ?>" onchange="updateAvailableTimeSlots(<?= $pc['computer_id'] ?>)" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Time Slot</label>
+                                    <select name="time_slot" id="time_slot_<?= $pc['computer_id'] ?>" class="form-select" required>
+                                        <option value="08:00 - 09:30" data-original-text="08:00 AM - 09:30 AM">08:00 AM - 09:30 AM</option>
+                                        <option value="09:40 - 11:10" data-original-text="09:40 AM - 11:10 AM">09:40 AM - 11:10 AM</option>
+                                        <option value="11:20 - 12:50" data-original-text="11:20 AM - 12:50 PM">11:20 AM - 12:50 PM</option>
+                                        <option value="01:00 - 02:30" data-original-text="01:00 PM - 02:30 PM">01:00 PM - 02:30 PM</option>
+                                        <option value="02:40 - 04:10" data-original-text="02:40 PM - 04:10 PM">02:40 PM - 04:10 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary-clrp btn-sm">Confirm Booking Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+
+    <script>
+    const bookedSlotsMap = <?= json_encode($bookedSlotsMap ?? []) ?>;
+
+    function updateAvailableTimeSlots(computerId) {
+        const dateInput = document.getElementById('reservation_date_' + computerId);
+        const select = document.getElementById('time_slot_' + computerId);
+        if (!dateInput || !select) return;
+
+        const selectedDate = dateInput.value;
+        const bookedSlots = (bookedSlotsMap[computerId] && bookedSlotsMap[computerId][selectedDate]) || [];
+
+        // Reset and apply disabled attributes
+        Array.from(select.options).forEach(option => {
+            option.disabled = false;
+            const originalText = option.getAttribute('data-original-text');
+            option.text = originalText;
+
+            if (bookedSlots.includes(option.value)) {
+                option.disabled = true;
+                option.text = originalText + ' (Booked)';
+            }
+        });
+
+        // Auto-select first available option if current selected is disabled
+        if (select.selectedOptions[0] && select.selectedOptions[0].disabled) {
+            const firstAvailable = Array.from(select.options).find(opt => !opt.disabled);
+            if (firstAvailable) {
+                select.value = firstAvailable.value;
+            } else {
+                select.value = ''; // No slots available
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Also listen to show.bs.modal event to auto-refresh slots when modal is opened
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('show.bs.modal', function (event) {
+                const dateInput = modal.querySelector('input[type="date"]');
+                if (dateInput) {
+                    // Trigger change event to populate/disable slots
+                    dateInput.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    });
+    </script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

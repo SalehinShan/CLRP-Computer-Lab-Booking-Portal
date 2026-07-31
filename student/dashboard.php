@@ -32,11 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($pc['status'] !== 'Available') {
                 set_flash('danger', "Computer {$pc['pc_label']} is currently {$pc['status']} and cannot be reserved.");
             } else {
-                $ins = $pdo->prepare("INSERT INTO Reservation (student_id, computer_id, reservation_date, time_slot, status) VALUES (?, ?, ?, ?, 'Pending')");
-                $ins->execute([$student_id, $computer_id, $reservation_date, $time_slot]);
-                set_flash('success', "Reservation request submitted for PC {$pc['pc_label']} on {$reservation_date} ({$time_slot}). Status: Pending.");
-                header("Location: " . url('/student/dashboard.php?tab=bookings'));
-                exit();
+                // Check if this computer is already booked (Approved) for the same date and time slot
+                $chk_res = $pdo->prepare("SELECT COUNT(*) FROM Reservation WHERE computer_id = ? AND reservation_date = ? AND time_slot = ? AND status = 'Approved'");
+                $chk_res->execute([$computer_id, $reservation_date, $time_slot]);
+                if ($chk_res->fetchColumn() > 0) {
+                    set_flash('danger', "Computer {$pc['pc_label']} is already booked/reserved for the selected date and time slot.");
+                } else {
+                    $ins = $pdo->prepare("INSERT INTO Reservation (student_id, computer_id, reservation_date, time_slot, status) VALUES (?, ?, ?, ?, 'Pending')");
+                    $ins->execute([$student_id, $computer_id, $reservation_date, $time_slot]);
+                    set_flash('success', "Reservation request submitted for PC {$pc['pc_label']} on {$reservation_date} ({$time_slot}). Status: Pending.");
+                    header("Location: " . url('/student/dashboard.php?tab=bookings'));
+                    exit();
+                }
             }
         } else {
             set_flash('danger', 'Please select a computer, date, and time slot.');
@@ -131,6 +138,25 @@ $stmtMyMaint = $pdo->prepare("
 ");
 $stmtMyMaint->execute([$student_id]);
 $my_issues = $stmtMyMaint->fetchAll();
+
+// Fetch all approved future reservations for slot blocking
+$stmtBooked = $pdo->prepare("SELECT computer_id, reservation_date, time_slot FROM Reservation WHERE status = 'Approved' AND reservation_date >= CURRENT_DATE()");
+$stmtBooked->execute();
+$bookedRows = $stmtBooked->fetchAll();
+
+$bookedSlotsMap = [];
+foreach ($bookedRows as $row) {
+    $cid = (int)$row['computer_id'];
+    $rdate = $row['reservation_date'];
+    $tslot = $row['time_slot'];
+    if (!isset($bookedSlotsMap[$cid])) {
+        $bookedSlotsMap[$cid] = [];
+    }
+    if (!isset($bookedSlotsMap[$cid][$rdate])) {
+        $bookedSlotsMap[$cid][$rdate] = [];
+    }
+    $bookedSlotsMap[$cid][$rdate][] = $tslot;
+}
 
 // Render View
 require_once __DIR__ . '/../views/student/dashboard.html';

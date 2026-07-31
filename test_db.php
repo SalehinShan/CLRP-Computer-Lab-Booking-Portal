@@ -1,10 +1,10 @@
 <?php
 // test_db.php
 
-$host = "localhost";
-$port = 3308;          // Your my.cnf shows MySQL is on port 3308
-$dbname = "clrp";      // Change if your database has a different name
-$username = "mysql";    // Default XAMPP username
+$host = "127.0.0.1";
+$port = 3306;          // Changed from 3308 to 3306
+$dbname = "clrp_db";      // Changed from clrp to clrp_db
+$username = "root";    // Changed from mysql to root
 $password = "";        // Default XAMPP password (empty)
 
 try {

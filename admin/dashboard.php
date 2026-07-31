@@ -179,9 +179,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'approve_reservation') {
         $res_id = (int)($_POST['reservation_id'] ?? 0);
         if ($res_id > 0) {
-            $stmt = $pdo->prepare("UPDATE Reservation SET status = 'Approved' WHERE reservation_id = ?");
-            $stmt->execute([$res_id]);
-            set_flash('success', "Reservation #{$res_id} Approved.");
+            // Find the reservation details first
+            $stmt_res = $pdo->prepare("SELECT computer_id, reservation_date, time_slot FROM Reservation WHERE reservation_id = ?");
+            $stmt_res->execute([$res_id]);
+            $res = $stmt_res->fetch();
+
+            if ($res) {
+                // Check if this computer is already booked (Approved) for the same date and time slot by someone else
+                $chk_res = $pdo->prepare("SELECT COUNT(*) FROM Reservation WHERE computer_id = ? AND reservation_date = ? AND time_slot = ? AND status = 'Approved' AND reservation_id != ?");
+                $chk_res->execute([$res['computer_id'], $res['reservation_date'], $res['time_slot'], $res_id]);
+
+                if ($chk_res->fetchColumn() > 0) {
+                    set_flash('danger', "Cannot approve. This computer is already booked (Approved) for the same date and time slot.");
+                } else {
+                    $stmt = $pdo->prepare("UPDATE Reservation SET status = 'Approved' WHERE reservation_id = ?");
+                    $stmt->execute([$res_id]);
+                    set_flash('success', "Reservation #{$res_id} Approved.");
+                }
+            }
         }
     } elseif ($action === 'reject_reservation') {
         $res_id = (int)($_POST['reservation_id'] ?? 0);
