@@ -24,10 +24,20 @@
             <p>Computer Laboratory Resource Portal</p>
         </div>
 
+        <?php 
+        $flash = get_flash();
+        if (!empty($flash)): 
+        ?>
+        <div class="alert alert-<?= e($flash['type']) ?> py-2 px-3 mb-4 d-flex align-items-center gap-2" style="font-size: 0.85rem;" role="alert">
+            <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+            <div><?= e($flash['message']) ?></div>
+        </div>
+        <?php endif; ?>
+
         <?php if (!empty($error)): ?>
-        <div class="alert alert-danger py-2 px-3 mb-4" style="font-size: 0.85rem;" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i>
-            <?= e($error) ?>
+        <div class="alert alert-danger py-2 px-3 mb-4 d-flex align-items-center gap-2" style="font-size: 0.85rem;" role="alert">
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+            <div><?= e($error) ?></div>
         </div>
         <?php endif; ?>
 
@@ -57,10 +67,17 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary-clrp w-100 py-2">
+            <button type="submit" class="btn btn-primary-clrp w-100 py-2.5 mb-3">
                 Sign In <i class="bi bi-arrow-right ms-1"></i>
             </button>
         </form>
+
+        <div class="text-center pt-3 mb-3 border-top border-secondary-subtle" style="font-size: 0.875rem;">
+            <span class="text-secondary">Don't have a portal account?</span>
+            <a href="<?= url('/register.php') ?>" class="text-primary font-semibold text-decoration-none ms-1">
+                Create an Account <i class="bi bi-person-plus"></i>
+            </a>
+        </div>
 
         <div class="mt-4 pt-3 border-top border-secondary-subtle demo-accounts-box">
             <div class="fw-semibold text-light-emphasis mb-2 d-flex align-items-center gap-1">
