@@ -1,372 +1,247 @@
-<?php
-// views/admin/dashboard.html - Admin Dashboard View Template
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
 
-require_once __DIR__ . '/../../includes/header.php';
-require_once __DIR__ . '/../../includes/sidebar.php';
-?>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center - CLRP Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/custom.css">
+    <style>
+        .col-md-2-4 {
+            flex: 0 0 auto;
+            width: 20%;
+        }
+        @media (max-width: 992px) {
+            .col-md-2-4 {
+                width: 50%;
+            }
+        }
+        @media (max-width: 576px) {
+            .col-md-2-4 {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
 
-<main class="app-content">
-    <div class="page-header">
-        <div>
-            <h2>Admin Control Center</h2>
-            <p>System Overview & Resource Management Portal</p>
-        </div>
-    </div>
-
-    <?php if ($flash): ?>
-        <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show mb-4" role="alert">
-            <?= e($flash['message']) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
-
-    <!-- Overview Analytics Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-2-4 col-sm-6 col-12">
-            <div class="stat-card">
-                <div class="stat-title">Total Computers</div>
-                <div class="stat-value"><?= $total_pcs ?></div>
-                <div class="stat-desc">Across <?= count($labs) ?> laboratories</div>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-brand">
+                <h1>CLRP Portal</h1>
+                <span>Computer Lab Resource Portal</span>
             </div>
-        </div>
-        <div class="col-md-2-4 col-sm-6 col-12">
-            <div class="stat-card">
-                <div class="stat-title">Available PCs</div>
-                <div class="stat-value" style="color: #34d399;"><?= $avail_pcs ?></div>
-                <div class="stat-desc">Ready for reservation</div>
-            </div>
-        </div>
-        <div class="col-md-2-4 col-sm-6 col-12">
-            <div class="stat-card">
-                <div class="stat-title">Under Maintenance</div>
-                <div class="stat-value" style="color: #f87171;"><?= $maint_pcs ?></div>
-                <div class="stat-desc">Hardware/Software repair</div>
-            </div>
-        </div>
-        <div class="col-md-2-4 col-sm-6 col-12">
-            <div class="stat-card">
-                <div class="stat-title">Registered Students</div>
-                <div class="stat-value"><?= $total_students ?></div>
-                <div class="stat-desc">Active portal users</div>
-            </div>
-        </div>
-        <div class="col-md-2-4 col-sm-6 col-12">
-            <div class="stat-card">
-                <div class="stat-title">Active Bookings</div>
-                <div class="stat-value" style="color: #60a5fa;"><?= $active_bookings ?></div>
-                <div class="stat-desc">Approved & Pending</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- TAB CONTENT SECTIONS -->
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#overview" id="nav-overview" class="active" onclick="switchTab('overview')">
+                        <i class="bi bi-speedometer2"></i> Analytics Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="#labs" id="nav-labs" onclick="switchTab('labs')">
+                        <i class="bi bi-building"></i> Manage Labs
+                    </a>
+                </li>
+                <li>
+                    <a href="#computers" id="nav-computers" onclick="switchTab('computers')">
+                        <i class="bi bi-laptop"></i> Manage Computers
+                    </a>
+                </li>
+                <li>
+                    <a href="#software" id="nav-software" onclick="switchTab('software')">
+                        <i class="bi bi-code-square"></i> Manage Software
+                    </a>
+                </li>
+                <li>
+                    <a href="#users" id="nav-users" onclick="switchTab('users')">
+                        <i class="bi bi-people"></i> Manage Users
+                    </a>
+                </li>
+                <li>
+                    <a href="#reservations" id="nav-reservations" onclick="switchTab('reservations')">
+                        <i class="bi bi-journal-bookmark"></i> Student Reservations
+                    </a>
+                </li>
+                <li>
+                    <a href="#maintenance" id="nav-maintenance" onclick="switchTab('maintenance')">
+                        <i class="bi bi-wrench-adjustable"></i> Maintenance Queue
+                    </a>
+                </li>
+            </ul>
 
-    <?php if ($tab === 'overview'): ?>
-        <div class="row g-3">
-            <div class="col-lg-7">
-                <div class="content-card">
-                    <h3 class="card-title">Laboratory Status Summary</h3>
-                    <div class="table-custom-container">
-                        <table class="table-custom">
-                            <thead>
-                                <tr>
-                                    <th>Lab Room</th>
-                                    <th>Capacity</th>
-                                    <th>Total PCs</th>
-                                    <th>Available</th>
-                                    <th>Under Maintenance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($labs as $lab): 
-                                    $l_avail = 0; $l_maint = 0;
-                                    foreach ($computers as $c) {
-                                        if ($c['lab_id'] == $lab['lab_id']) {
-                                            if ($c['status'] === 'Available') $l_avail++;
-                                            if ($c['status'] === 'Under Maintenance') $l_maint++;
-                                        }
-                                    }
-                                ?>
-                                    <tr>
-                                        <td class="fw-semibold"><?= e($lab['room_number']) ?></td>
-                                        <td><?= $lab['capacity'] ?> Seats</td>
-                                        <td><?= $lab['total_computers'] ?> PCs</td>
-                                        <td><span class="status-badge badge-available"><?= $l_avail ?> Available</span></td>
-                                        <td><span class="status-badge badge-maintenance"><?= $l_maint ?> In Repair</span></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="user-name" title="System Administrator">System Administrator</div>
+                        <div class="user-role">Administrator (Full Control)</div>
+                    </div>
+                    <a href="../login.html" class="btn-logout" title="Sign Out">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Application Content -->
+        <main class="app-content">
+            <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2>Admin Control Center</h2>
+                    <p class="mb-0">System Overview & Resource Management Portal</p>
+                </div>
+                <div>
+                    <a href="../../index.html" class="btn btn-outline-clrp btn-sm"><i class="bi bi-house me-1"></i> Home</a>
+                </div>
+            </div>
+
+            <div id="flash-alert" class="alert alert-success alert-dismissible fade show mb-4 d-none" role="alert">
+                <span id="flash-msg">System update recorded successfully.</span>
+                <button type="button" class="btn-close" onclick="document.getElementById('flash-alert').classList.add('d-none')"></button>
+            </div>
+
+            <!-- Overview Analytics Stats Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-2-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Computers</div>
+                        <div class="stat-value" id="stat-pcs">48</div>
+                        <div class="stat-desc">Across 4 laboratories</div>
+                    </div>
+                </div>
+                <div class="col-md-2-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Available PCs</div>
+                        <div class="stat-value" style="color: #34d399;" id="stat-avail">32</div>
+                        <div class="stat-desc">Ready for reservation</div>
+                    </div>
+                </div>
+                <div class="col-md-2-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Under Maintenance</div>
+                        <div class="stat-value" style="color: #f87171;" id="stat-maint">6</div>
+                        <div class="stat-desc">Hardware/Software repair</div>
+                    </div>
+                </div>
+                <div class="col-md-2-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Registered Students</div>
+                        <div class="stat-value" id="stat-students">128</div>
+                        <div class="stat-desc">Active portal users</div>
+                    </div>
+                </div>
+                <div class="col-md-2-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Active Bookings</div>
+                        <div class="stat-value" style="color: #60a5fa;" id="stat-bookings">14</div>
+                        <div class="stat-desc">Approved & Pending</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-5">
-                <div class="content-card">
-                    <h3 class="card-title">Recent System Maintenance Logs</h3>
-                    <div class="list-group list-group-flush" style="font-size: 0.85rem;">
-                        <?php 
-                        $recent = array_slice($maintenance_tickets, 0, 5);
-                        if (empty($recent)): ?>
-                            <div class="text-muted py-3">No maintenance records logged.</div>
-                        <?php else: ?>
-                            <?php foreach ($recent as $rec): ?>
-                                <div class="list-group-item px-0 border-bottom py-2">
+            <!-- TAB 1: OVERVIEW -->
+            <div id="tab-overview" class="tab-section">
+                <div class="row g-3">
+                    <div class="col-lg-7">
+                        <div class="content-card">
+                            <h3 class="card-title">Laboratory Status Summary</h3>
+                            <div class="table-custom-container">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Lab Room</th>
+                                            <th>Capacity</th>
+                                            <th>Total PCs</th>
+                                            <th>Available</th>
+                                            <th>Under Maintenance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-semibold">Lab 605</td>
+                                            <td>35 Seats</td>
+                                            <td>12 PCs</td>
+                                            <td><span class="status-badge badge-available">9 Available</span></td>
+                                            <td><span class="status-badge badge-maintenance">2 In Repair</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-semibold">Lab 606</td>
+                                            <td>40 Seats</td>
+                                            <td>14 PCs</td>
+                                            <td><span class="status-badge badge-available">10 Available</span></td>
+                                            <td><span class="status-badge badge-maintenance">1 In Repair</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-semibold">Lab 607</td>
+                                            <td>30 Seats</td>
+                                            <td>10 PCs</td>
+                                            <td><span class="status-badge badge-available">6 Available</span></td>
+                                            <td><span class="status-badge badge-maintenance">2 In Repair</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-semibold">Lab 608</td>
+                                            <td>35 Seats</td>
+                                            <td>12 PCs</td>
+                                            <td><span class="status-badge badge-available">7 Available</span></td>
+                                            <td><span class="status-badge badge-maintenance">1 In Repair</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="content-card">
+                            <h3 class="card-title">Recent System Maintenance Logs</h3>
+                            <div class="list-group list-group-flush" style="font-size: 0.85rem;">
+                                <div class="list-group-item bg-transparent px-0 border-bottom py-2">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <strong class="text-dark"><?= e($rec['pc_label']) ?> (<?= e($rec['room_number']) ?>)</strong>
-                                        <?= render_status_badge($rec['status']) ?>
+                                        <strong class="text-white">PC-607-03 (Lab 607)</strong>
+                                        <span class="status-badge badge-maintenance">In Repair</span>
                                     </div>
-                                    <div class="text-muted text-truncate"><?= e($rec['issue_description']) ?></div>
-                                    <div class="text-muted" style="font-size: 0.75rem;"><?= e($rec['reported_at']) ?></div>
+                                    <div class="text-secondary text-truncate">GPU flickering and black screen during AutoCAD rendering</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">2026-08-05 14:20</div>
                                 </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                                <div class="list-group-item bg-transparent px-0 border-bottom py-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-white">PC-605-09 (Lab 605)</strong>
+                                        <span class="status-badge badge-reserved">Pending</span>
+                                    </div>
+                                    <div class="text-secondary text-truncate">Ethernet port link down, no internet access on workstation</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">2026-08-05 16:45</div>
+                                </div>
+                                <div class="list-group-item bg-transparent px-0 border-bottom py-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-white">PC-608-02 (Lab 608)</strong>
+                                        <span class="status-badge badge-maintenance">In Repair</span>
+                                    </div>
+                                    <div class="text-secondary text-truncate">Keyboard spacebar un-responsive & RAM stick error on boot</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">2026-08-04 11:10</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-    <?php elseif ($tab === 'labs'): ?>
-        <!-- LABS MANAGEMENT -->
-        <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="card-title mb-0">Manage Laboratories</h3>
-                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addLabModal">
-                    <i class="bi bi-plus-lg me-1"></i> Add New Lab Room
-                </button>
-            </div>
-
-            <div class="table-custom-container">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Lab ID</th>
-                            <th>Room Number</th>
-                            <th>Seating Capacity</th>
-                            <th>Total Computers</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($labs as $lab): ?>
-                            <tr>
-                                <td>#<?= $lab['lab_id'] ?></td>
-                                <td class="fw-semibold"><?= e($lab['room_number']) ?></td>
-                                <td><?= $lab['capacity'] ?> Seats</td>
-                                <td><?= $lab['total_computers'] ?> PCs</td>
-                                <td class="text-end">
-                                    <button class="btn btn-outline-clrp btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editLabModal<?= $lab['lab_id'] ?>">Edit</button>
-                                    <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete this lab?');">
-                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                        <input type="hidden" name="action" value="delete_lab">
-                                        <input type="hidden" name="lab_id" value="<?= $lab['lab_id'] ?>">
-                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-
-                            <!-- Edit Lab Modal -->
-                            <div class="modal fade" id="editLabModal<?= $lab['lab_id'] ?>" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="edit_lab">
-                                            <input type="hidden" name="lab_id" value="<?= $lab['lab_id'] ?>">
-                                            <div class="modal-header"><h5 class="modal-title fs-6">Edit Lab Room #<?= $lab['lab_id'] ?></h5></div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Room Number</label>
-                                                    <input type="text" name="room_number" class="form-control" value="<?= e($lab['room_number']) ?>" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Seating Capacity</label>
-                                                    <input type="number" name="capacity" class="form-control" value="<?= $lab['capacity'] ?>" required>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Add Lab Modal -->
-        <div class="modal fade" id="addLabModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                        <input type="hidden" name="action" value="add_lab">
-                        <div class="modal-header"><h5 class="modal-title fs-6">Add New Laboratory Room</h5></div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Room Number</label>
-                                <input type="text" name="room_number" class="form-control" placeholder="e.g. Room 605" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Capacity (Seats)</label>
-                                <input type="number" name="capacity" class="form-control" value="35" required>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary-clrp btn-sm">Create Laboratory</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-    <?php elseif ($tab === 'computers'): ?>
-        <!-- COMPUTERS MANAGEMENT -->
-        <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="card-title mb-0">Manage Computer Workstations</h3>
-                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addPCModal">
-                    <i class="bi bi-plus-lg me-1"></i> Add Computer
-                </button>
-            </div>
-
-            <div class="table-custom-container">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>PC ID</th>
-                            <th>PC Label</th>
-                            <th>Lab Room</th>
-                            <th>IP Address</th>
-                            <th>Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($computers as $pc): ?>
-                            <tr>
-                                <td>#<?= $pc['computer_id'] ?></td>
-                                <td class="fw-semibold"><?= e($pc['pc_label']) ?></td>
-                                <td><?= e($pc['room_number'] ?? 'Unassigned') ?></td>
-                                <td><code><?= e($pc['ip_address']) ?></code></td>
-                                <td><?= render_status_badge($pc['status']) ?></td>
-                                <td class="text-end">
-                                    <button class="btn btn-outline-clrp btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editPCModal<?= $pc['computer_id'] ?>">Edit</button>
-                                    <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete PC record?');">
-                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                        <input type="hidden" name="action" value="delete_computer">
-                                        <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
-                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-
-                            <!-- Edit PC Modal -->
-                            <div class="modal fade" id="editPCModal<?= $pc['computer_id'] ?>" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="edit_computer">
-                                            <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
-                                            <div class="modal-header"><h5 class="modal-title fs-6">Edit PC - <?= e($pc['pc_label']) ?></h5></div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">PC Label</label>
-                                                    <input type="text" name="pc_label" class="form-control" value="<?= e($pc['pc_label']) ?>" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">IP Address</label>
-                                                    <input type="text" name="ip_address" class="form-control" value="<?= e($pc['ip_address']) ?>">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Assigned Lab Room</label>
-                                                    <select name="lab_id" class="form-select" required>
-                                                        <?php foreach ($labs as $l): ?>
-                                                            <option value="<?= $l['lab_id'] ?>" <?= $pc['lab_id'] == $l['lab_id'] ? 'selected' : '' ?>><?= e($l['room_number']) ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Operating Status</label>
-                                                    <select name="status" class="form-select" required>
-                                                        <option value="Available" <?= $pc['status'] === 'Available' ? 'selected' : '' ?>>Available</option>
-                                                        <option value="In Use" <?= $pc['status'] === 'In Use' ? 'selected' : '' ?>>In Use</option>
-                                                        <option value="Reserved" <?= $pc['status'] === 'Reserved' ? 'selected' : '' ?>>Reserved</option>
-                                                        <option value="Under Maintenance" <?= $pc['status'] === 'Under Maintenance' ? 'selected' : '' ?>>Under Maintenance</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Add PC Modal -->
-        <div class="modal fade" id="addPCModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                        <input type="hidden" name="action" value="add_computer">
-                        <div class="modal-header"><h5 class="modal-title fs-6">Add Computer Workstation</h5></div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">PC Label</label>
-                                <input type="text" name="pc_label" class="form-control" placeholder="e.g. PC-601-07" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">IP Address</label>
-                                <input type="text" name="ip_address" class="form-control" placeholder="192.168.1.125">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Lab Room</label>
-                                <select name="lab_id" class="form-select" required>
-                                    <?php foreach ($labs as $l): ?>
-                                        <option value="<?= $l['lab_id'] ?>"><?= e($l['room_number']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Initial Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="Available">Available</option>
-                                    <option value="Under Maintenance">Under Maintenance</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary-clrp btn-sm">Add Computer</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-    <?php elseif ($tab === 'software'): ?>
-        <!-- SOFTWARE MANAGEMENT -->
-        <div class="row g-3">
-            <div class="col-lg-7">
+            <!-- TAB 2: MANAGE LABS -->
+            <div id="tab-labs" class="tab-section d-none">
                 <div class="content-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="card-title mb-0">Software Applications Catalog</h3>
-                        <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addSoftwareModal">
-                            <i class="bi bi-plus-lg me-1"></i> Add Software
+                        <h3 class="card-title mb-0">Manage Laboratories</h3>
+                        <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addLabModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add New Lab Room
                         </button>
                     </div>
 
@@ -374,413 +249,738 @@ require_once __DIR__ . '/../../includes/sidebar.php';
                         <table class="table-custom">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Software Name</th>
-                                    <th>Version</th>
-                                    <th>License Type</th>
-                                    <th>Installations</th>
+                                    <th>Lab ID</th>
+                                    <th>Room Number</th>
+                                    <th>Seating Capacity</th>
+                                    <th>Total Computers</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php foreach ($softwares as $sw): ?>
-                                    <tr>
-                                        <td>#<?= $sw['software_id'] ?></td>
-                                        <td class="fw-semibold"><?= e($sw['software_name']) ?></td>
-                                        <td><?= e($sw['version']) ?></td>
-                                        <td><span class="badge bg-secondary-subtle text-secondary border px-2"><?= e($sw['license_type']) ?></span></td>
-                                        <td><?= $sw['total_installations'] ?> PCs</td>
-                                        <td class="text-end">
-                                            <form action="<?= url('/admin/dashboard.php?tab=software') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete software entry?');">
-                                                <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                                <input type="hidden" name="action" value="delete_software">
-                                                <input type="hidden" name="software_id" value="<?= $sw['software_id'] ?>">
-                                                <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
+                            <tbody id="labs-table-body">
+                                <tr>
+                                    <td>#LAB-1</td>
+                                    <td class="fw-semibold">Lab 605</td>
+                                    <td>35 Seats</td>
+                                    <td>12 PCs</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing Lab 605 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Lab 605')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#LAB-2</td>
+                                    <td class="fw-semibold">Lab 606</td>
+                                    <td>40 Seats</td>
+                                    <td>14 PCs</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing Lab 606 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Lab 606')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#LAB-3</td>
+                                    <td class="fw-semibold">Lab 607</td>
+                                    <td>30 Seats</td>
+                                    <td>10 PCs</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing Lab 607 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Lab 607')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#LAB-4</td>
+                                    <td class="fw-semibold">Lab 608</td>
+                                    <td>35 Seats</td>
+                                    <td>12 PCs</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing Lab 608 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Lab 608')">Delete</button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-5">
+            <!-- TAB 3: MANAGE COMPUTERS -->
+            <div id="tab-computers" class="tab-section d-none">
                 <div class="content-card">
-                    <h3 class="card-title">Map Software to Computer</h3>
-                    <p class="text-muted" style="font-size: 0.85rem;">Link software applications to specific lab workstations.</p>
-
-                    <form action="<?= url('/admin/dashboard.php?tab=software') ?>" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                        <input type="hidden" name="action" value="link_software">
-
-                        <div class="mb-3">
-                            <label class="form-label">Select Computer</label>
-                            <select name="computer_id" class="form-select" required>
-                                <?php foreach ($computers as $c): ?>
-                                    <option value="<?= $c['computer_id'] ?>"><?= e($c['pc_label']) ?> (<?= e($c['room_number']) ?>)</option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Select Software</label>
-                            <select name="software_id" class="form-select" required>
-                                <?php foreach ($softwares as $s): ?>
-                                    <option value="<?= $s['software_id'] ?>"><?= e($s['software_name']) ?> (v<?= e($s['version']) ?>)</option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Installation Date</label>
-                            <input type="date" name="installation_date" class="form-control" value="<?= date('Y-m-d') ?>">
-                        </div>
-
-                        <button type="submit" class="btn btn-primary-clrp w-100">
-                            Link Application to PC <i class="bi bi-link-45deg ms-1"></i>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title mb-0">Manage Computer Workstations</h3>
+                        <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addPCModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add Computer
                         </button>
-                    </form>
+                    </div>
+
+                    <div class="table-custom-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>PC ID</th>
+                                    <th>PC Label</th>
+                                    <th>Lab Room</th>
+                                    <th>IP Address</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pcs-table-body">
+                                <tr>
+                                    <td>#PC-101</td>
+                                    <td class="fw-semibold">PC-605-01</td>
+                                    <td>Lab 605</td>
+                                    <td><code>192.168.1.101</code></td>
+                                    <td><span class="status-badge badge-available">Available</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing PC-605-01 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'PC-605-01')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#PC-102</td>
+                                    <td class="fw-semibold">PC-605-02</td>
+                                    <td>Lab 605</td>
+                                    <td><code>192.168.1.102</code></td>
+                                    <td><span class="status-badge badge-available">Available</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing PC-605-02 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'PC-605-02')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#PC-205</td>
+                                    <td class="fw-semibold">PC-606-05</td>
+                                    <td>Lab 606</td>
+                                    <td><code>192.168.2.105</code></td>
+                                    <td><span class="status-badge badge-in-use">In Use</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing PC-606-05 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'PC-606-05')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#PC-303</td>
+                                    <td class="fw-semibold">PC-607-03</td>
+                                    <td>Lab 607</td>
+                                    <td><code>192.168.3.103</code></td>
+                                    <td><span class="status-badge badge-maintenance">Under Maintenance</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing PC-607-03 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'PC-607-03')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#PC-401</td>
+                                    <td class="fw-semibold">PC-608-01</td>
+                                    <td>Lab 608</td>
+                                    <td><code>192.168.4.101</code></td>
+                                    <td><span class="status-badge badge-reserved">Reserved</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-clrp btn-sm me-1" onclick="alert('Editing PC-608-01 details...')">Edit</button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'PC-608-01')">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Add Software Modal -->
-        <div class="modal fade" id="addSoftwareModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <form action="<?= url('/admin/dashboard.php?tab=software') ?>" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                        <input type="hidden" name="action" value="add_software">
-                        <div class="modal-header"><h5 class="modal-title fs-6">Add Software Package</h5></div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Software Name</label>
-                                <input type="text" name="software_name" class="form-control" placeholder="e.g. MATLAB, AutoCAD" required>
+            <!-- TAB 4: MANAGE SOFTWARE -->
+            <div id="tab-software" class="tab-section d-none">
+                <div class="row g-3">
+                    <div class="col-lg-7">
+                        <div class="content-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="card-title mb-0">Software Applications Catalog</h3>
+                                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addSoftwareModal">
+                                    <i class="bi bi-plus-lg me-1"></i> Add Software
+                                </button>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Version</label>
-                                <input type="text" name="version" class="form-control" placeholder="e.g. R2024a">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">License Type</label>
-                                <select name="license_type" class="form-select">
-                                    <option value="Proprietary">Proprietary</option>
-                                    <option value="Open Source">Open Source</option>
-                                    <option value="Freeware">Freeware</option>
-                                    <option value="Volume License">Volume License</option>
-                                </select>
+
+                            <div class="table-custom-container">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Software Name</th>
+                                            <th>Version</th>
+                                            <th>License Type</th>
+                                            <th>Installations</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="software-table-body">
+                                        <tr>
+                                            <td>#SW-1</td>
+                                            <td class="fw-semibold">MATLAB</td>
+                                            <td>R2024a</td>
+                                            <td><span class="badge bg-secondary-subtle text-secondary border px-2">Volume License</span></td>
+                                            <td>26 PCs</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'MATLAB')">Delete</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#SW-2</td>
+                                            <td class="fw-semibold">AutoCAD</td>
+                                            <td>2024</td>
+                                            <td><span class="badge bg-secondary-subtle text-secondary border px-2">Educational</span></td>
+                                            <td>18 PCs</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'AutoCAD')">Delete</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#SW-3</td>
+                                            <td class="fw-semibold">VS Code</td>
+                                            <td>1.88.1</td>
+                                            <td><span class="badge bg-secondary-subtle text-secondary border px-2">Open Source</span></td>
+                                            <td>48 PCs</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'VS Code')">Delete</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#SW-4</td>
+                                            <td class="fw-semibold">Cisco Packet Tracer</td>
+                                            <td>8.2.1</td>
+                                            <td><span class="badge bg-secondary-subtle text-secondary border px-2">Freeware</span></td>
+                                            <td>22 PCs</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Cisco Packet Tracer')">Delete</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary-clrp btn-sm">Add Software</button>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="content-card">
+                            <h3 class="card-title">Map Software to Computer</h3>
+                            <p class="text-muted" style="font-size: 0.85rem;">Link software applications to specific lab workstations.</p>
+
+                            <form onsubmit="handleLinkSoftware(event)">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Computer</label>
+                                    <select class="form-select" required>
+                                        <option value="PC-605-01">PC-605-01 (Lab 605)</option>
+                                        <option value="PC-606-05">PC-606-05 (Lab 606)</option>
+                                        <option value="PC-607-03">PC-607-03 (Lab 607)</option>
+                                        <option value="PC-608-01">PC-608-01 (Lab 608)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Select Software</label>
+                                    <select class="form-select" required>
+                                        <option value="MATLAB">MATLAB (vR2024a)</option>
+                                        <option value="AutoCAD">AutoCAD (v2024)</option>
+                                        <option value="VS Code">VS Code (v1.88.1)</option>
+                                        <option value="Cisco Packet Tracer">Cisco Packet Tracer (v8.2.1)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Installation Date</label>
+                                    <input type="date" class="form-control" value="2026-08-05">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-clrp w-100">
+                                    Link Application to PC <i class="bi bi-link-45deg ms-1"></i>
+                                </button>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    <?php elseif ($tab === 'users'): ?>
-        <!-- USER MANAGEMENT -->
-        <div class="content-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="card-title mb-0">System User Accounts</h3>
-                <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                    <i class="bi bi-person-plus me-1"></i> Add User Account
-                </button>
-            </div>
+            <!-- TAB 5: MANAGE USERS -->
+            <div id="tab-users" class="tab-section d-none">
+                <div class="content-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title mb-0">System User Accounts</h3>
+                        <button type="button" class="btn btn-primary-clrp btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                            <i class="bi bi-person-plus me-1"></i> Add User Account
+                        </button>
+                    </div>
 
-            <!-- Student Users -->
-            <h5 class="mt-3 mb-2 fs-6 text-primary font-semibold">Student Accounts (<?= count($students_list) ?>)</h5>
-            <div class="table-custom-container mb-4">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach (array_slice($students_list, 0, 10) as $st): ?>
-                            <tr>
-                                <td class="fw-semibold"><code><?= e($st['student_id']) ?></code></td>
-                                <td><?= e($st['name']) ?></td>
-                                <td><?= e($st['email']) ?></td>
-                                <td><?= e($st['dept_name'] ?? $st['dept_id']) ?></td>
-                                <td class="text-end">
-                                    <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete student account?');">
-                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                        <input type="hidden" name="action" value="delete_user">
-                                        <input type="hidden" name="user_type" value="student">
-                                        <input type="hidden" name="id" value="<?= $st['student_id'] ?>">
-                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                    <!-- Students -->
+                    <h5 class="mt-3 mb-2 fs-6 text-primary font-semibold">Student Accounts (128)</h5>
+                    <div class="table-custom-container mb-4">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold"><code>2111001042</code></td>
+                                    <td>Md. Abu Salehin Shan</td>
+                                    <td>abu.shan.241@northsouth.edu</td>
+                                    <td>ECE - Electrical & Computer Engineering</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Student Shan')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold"><code>2111001045</code></td>
+                                    <td>Tawhid Hasan</td>
+                                    <td>tawhid.hasan@northsouth.edu</td>
+                                    <td>CSE - Computer Science & Engineering</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Student Tawhid')">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Technician Users -->
-            <h5 class="mt-4 mb-2 fs-6 text-primary font-semibold">Technician Accounts (<?= count($technicians) ?>)</h5>
-            <div class="table-custom-container mb-4">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Tech ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Specialization</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($technicians as $tech): ?>
-                            <tr>
-                                <td>#<?= $tech['technician_id'] ?></td>
-                                <td class="fw-semibold"><?= e($tech['name']) ?></td>
-                                <td><?= e($tech['email']) ?></td>
-                                <td><span class="badge bg-info-subtle text-info-emphasis border px-2"><?= e($tech['specialization']) ?></span></td>
-                                <td class="text-end">
-                                    <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete technician account?');">
-                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                        <input type="hidden" name="action" value="delete_user">
-                                        <input type="hidden" name="user_type" value="technician">
-                                        <input type="hidden" name="id" value="<?= $tech['technician_id'] ?>">
-                                        <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                    <!-- Technicians -->
+                    <h5 class="mt-4 mb-2 fs-6 text-primary font-semibold">Technician Accounts (4)</h5>
+                    <div class="table-custom-container mb-4">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Tech ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Specialization</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#TECH-1</td>
+                                    <td class="fw-semibold">Kamrul Hasan</td>
+                                    <td>kamrul.hasan@northsouth.edu</td>
+                                    <td><span class="badge bg-info-subtle text-info-emphasis border px-2">Hardware & Networking</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Tech Kamrul')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#TECH-2</td>
+                                    <td class="fw-semibold">Arif Chowdhury</td>
+                                    <td>arif.c@northsouth.edu</td>
+                                    <td><span class="badge bg-info-subtle text-info-emphasis border px-2">Software & Operating Systems</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, 'Tech Arif')">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Admin Users -->
-            <h5 class="mt-4 mb-2 fs-6 text-primary font-semibold">Administrator Accounts (<?= count($admins_list) ?>)</h5>
-            <div class="table-custom-container">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Admin ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($admins_list as $adm): ?>
-                            <tr>
-                                <td>#<?= $adm['admin_id'] ?></td>
-                                <td class="fw-semibold"><?= e($adm['name']) ?></td>
-                                <td><?= e($adm['email']) ?></td>
-                                <td class="text-end">
-                                    <?php if ($adm['admin_id'] != $user['id']): ?>
-                                        <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST" class="d-inline" onsubmit="return confirm('Delete admin account?');">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="delete_user">
-                                            <input type="hidden" name="user_type" value="admin">
-                                            <input type="hidden" name="id" value="<?= $adm['admin_id'] ?>">
-                                            <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                        </form>
-                                    <?php else: ?>
-                                        <span class="text-muted" style="font-size: 0.8rem;">Current Account</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Add User Modal -->
-        <div class="modal fade" id="addUserModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <form action="<?= url('/admin/dashboard.php?tab=users') ?>" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                        <input type="hidden" name="action" value="add_user">
-                        <div class="modal-header"><h5 class="modal-title fs-6">Create New User Account</h5></div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Role / Account Type</label>
-                                <select name="user_type" id="user_type_select" class="form-select" required onchange="toggleUserFields(this.value)">
-                                    <option value="student">Student</option>
-                                    <option value="technician">Technician</option>
-                                    <option value="admin">Administrator</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3" id="student_id_group">
-                                <label class="form-label">Student ID</label>
-                                <input type="text" name="student_id" class="form-control" placeholder="e.g. 2411259999">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" name="name" class="form-control" required placeholder="User Full Name">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" name="email" class="form-control" required placeholder="name@northsouth.edu">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" value="password123" required>
-                            </div>
-
-                            <div class="mb-3" id="dept_group">
-                                <label class="form-label">Department</label>
-                                <select name="dept_id" class="form-select">
-                                    <?php foreach ($departments as $d): ?>
-                                        <option value="<?= $d['dept_id'] ?>"><?= e($d['dept_id']) ?> - <?= e($d['dept_name']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="mb-3 d-none" id="spec_group">
-                                <label class="form-label">Specialization</label>
-                                <input type="text" name="specialization" class="form-control" placeholder="Hardware, Networking, OS...">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary-clrp btn-sm">Create User</button>
-                        </div>
-                    </form>
+                    <!-- Admins -->
+                    <h5 class="mt-4 mb-2 fs-6 text-primary font-semibold">Administrator Accounts (2)</h5>
+                    <div class="table-custom-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Admin ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#ADM-1</td>
+                                    <td class="fw-semibold">System Administrator</td>
+                                    <td>admin.sys@northsouth.edu</td>
+                                    <td class="text-end"><span class="text-muted" style="font-size: 0.8rem;">Current Account</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <script>
-        function toggleUserFields(val) {
-            document.getElementById('student_id_group').classList.toggle('d-none', val !== 'student');
-            document.getElementById('dept_group').classList.toggle('d-none', val !== 'student');
-            document.getElementById('spec_group').classList.toggle('d-none', val !== 'technician');
-        }
-        </script>
+            <!-- TAB 6: STUDENT RESERVATIONS -->
+            <div id="tab-reservations" class="tab-section d-none">
+                <div class="content-card">
+                    <h3 class="card-title mb-3">Student Booking Requests</h3>
 
-    <?php elseif ($tab === 'reservations'): ?>
-        <!-- RESERVATION MANAGEMENT -->
-        <div class="content-card">
-            <h3 class="card-title">Student Booking Requests</h3>
-
-            <div class="table-custom-container">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Res ID</th>
-                            <th>Student Name</th>
-                            <th>Student ID</th>
-                            <th>PC Label / Room</th>
-                            <th>Date</th>
-                            <th>Time Slot</th>
-                            <th>Status</th>
-                            <th class="text-end">Approval Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($reservations as $r): ?>
-                            <tr>
-                                <td>#<?= $r['reservation_id'] ?></td>
-                                <td class="fw-semibold"><?= e($r['student_name']) ?></td>
-                                <td><code><?= e($r['student_id']) ?></code></td>
-                                <td><?= e($r['pc_label']) ?> (<?= e($r['room_number']) ?>)</td>
-                                <td><?= e($r['reservation_date']) ?></td>
-                                <td><code><?= e($r['time_slot']) ?></code></td>
-                                <td><?= render_status_badge($r['status']) ?></td>
-                                <td class="text-end">
-                                    <?php if ($r['status'] === 'Pending'): ?>
-                                        <form action="<?= url('/admin/dashboard.php?tab=reservations') ?>" method="POST" class="d-inline">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="approve_reservation">
-                                            <input type="hidden" name="reservation_id" value="<?= $r['reservation_id'] ?>">
-                                            <button type="submit" class="btn btn-success btn-sm py-1 px-2" style="font-size: 0.8rem;">
-                                                Approve <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </form>
-
-                                        <form action="<?= url('/admin/dashboard.php?tab=reservations') ?>" method="POST" class="d-inline">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="reject_reservation">
-                                            <input type="hidden" name="reservation_id" value="<?= $r['reservation_id'] ?>">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm py-1 px-2" style="font-size: 0.8rem;">
-                                                Reject <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </form>
-                                    <?php else: ?>
-                                        <span class="text-muted" style="font-size: 0.8rem;">Processed</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                    <div class="table-custom-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Res ID</th>
+                                    <th>Student Name</th>
+                                    <th>Student ID</th>
+                                    <th>PC Label / Room</th>
+                                    <th>Date</th>
+                                    <th>Time Slot</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Approval Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reservations-table-body">
+                                <tr>
+                                    <td>#RES-104</td>
+                                    <td class="fw-semibold">Md. Abu Salehin Shan</td>
+                                    <td><code>2111001042</code></td>
+                                    <td>PC-605-01 (Lab 605)</td>
+                                    <td>2026-08-07</td>
+                                    <td><code>10:00 AM - 12:00 PM</code></td>
+                                    <td><span class="status-badge badge-available">Approved</span></td>
+                                    <td class="text-end"><span class="text-muted" style="font-size: 0.8rem;">Processed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#RES-109</td>
+                                    <td class="fw-semibold">Md. Abu Salehin Shan</td>
+                                    <td><code>2111001042</code></td>
+                                    <td>PC-607-12 (Lab 607)</td>
+                                    <td>2026-08-08</td>
+                                    <td><code>02:00 PM - 04:00 PM</code></td>
+                                    <td><span class="status-badge badge-reserved">Pending</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-success btn-sm me-1" onclick="approveRes(this)">Approve <i class="bi bi-check-lg"></i></button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="rejectRes(this)">Reject <i class="bi bi-x-lg"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#RES-112</td>
+                                    <td class="fw-semibold">Tawhid Hasan</td>
+                                    <td><code>2111001045</code></td>
+                                    <td>PC-606-08 (Lab 606)</td>
+                                    <td>2026-08-07</td>
+                                    <td><code>12:00 PM - 02:00 PM</code></td>
+                                    <td><span class="status-badge badge-reserved">Pending</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-success btn-sm me-1" onclick="approveRes(this)">Approve <i class="bi bi-check-lg"></i></button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="rejectRes(this)">Reject <i class="bi bi-x-lg"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
 
-    <?php elseif ($tab === 'maintenance'): ?>
-        <!-- MAINTENANCE QUEUE & TECHNICIAN ASSIGNMENT -->
-        <div class="content-card">
-            <h3 class="card-title">Maintenance Tickets & Technician Assignment</h3>
+            <!-- TAB 7: MAINTENANCE QUEUE -->
+            <div id="tab-maintenance" class="tab-section d-none">
+                <div class="content-card">
+                    <h3 class="card-title mb-3">Maintenance Tickets & Technician Assignment</h3>
 
-            <div class="table-custom-container">
-                <table class="table-custom">
-                    <thead>
-                        <tr>
-                            <th>Ticket ID</th>
-                            <th>Computer / Room</th>
-                            <th>Issue Description</th>
-                            <th>Reported By</th>
-                            <th>Status</th>
-                            <th>Assigned Technician</th>
-                            <th class="text-end">Assign Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($maintenance_tickets as $m): ?>
-                            <tr>
-                                <td>#<?= $m['maintenance_id'] ?></td>
-                                <td class="fw-semibold"><?= e($m['pc_label']) ?> (<?= e($m['room_number']) ?>)</td>
-                                <td><?= e($m['issue_description']) ?></td>
-                                <td><?= e($m['student_name'] ?? 'System') ?></td>
-                                <td><?= render_status_badge($m['status']) ?></td>
-                                <td>
-                                    <span class="fw-medium text-dark"><?= e($m['tech_name'] ?? 'Unassigned') ?></span>
-                                </td>
-                                <td class="text-end">
-                                    <form action="<?= url('/admin/dashboard.php?tab=maintenance') ?>" method="POST" class="d-inline">
-                                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                        <input type="hidden" name="action" value="assign_technician">
-                                        <input type="hidden" name="maintenance_id" value="<?= $m['maintenance_id'] ?>">
-
-                                        <select name="technician_id" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
-                                            <option value="">-- Assign Tech --</option>
-                                            <?php foreach ($technicians as $t): ?>
-                                                <option value="<?= $t['technician_id'] ?>" <?= $m['technician_id'] == $t['technician_id'] ? 'selected' : '' ?>>
-                                                    <?= e($t['name']) ?> (<?= e($t['specialization']) ?>)
-                                                </option>
-                                            <?php endforeach; ?>
+                    <div class="table-custom-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Computer / Room</th>
+                                    <th>Issue Description</th>
+                                    <th>Reported By</th>
+                                    <th>Status</th>
+                                    <th>Assigned Technician</th>
+                                    <th class="text-end">Assign Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#TK-1082</td>
+                                    <td class="fw-semibold">PC-607-03 (Lab 607)</td>
+                                    <td>GPU flickering and black screen during AutoCAD rendering</td>
+                                    <td>Md. Abu Salehin Shan</td>
+                                    <td><span class="status-badge badge-maintenance">In Progress</span></td>
+                                    <td><span class="fw-medium text-white">Kamrul Hasan</span></td>
+                                    <td class="text-end">
+                                        <select class="form-select form-select-sm d-inline-block w-auto" onchange="showFlash('Assigned technician updated!')">
+                                            <option value="1" selected>Kamrul Hasan (Hardware)</option>
+                                            <option value="2">Arif Chowdhury (Software)</option>
                                         </select>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#TK-1085</td>
+                                    <td class="fw-semibold">PC-605-09 (Lab 605)</td>
+                                    <td>Ethernet port link down, no internet access on workstation</td>
+                                    <td>Tawhid Hasan</td>
+                                    <td><span class="status-badge badge-reserved">Pending</span></td>
+                                    <td><span class="fw-medium text-warning">Unassigned</span></td>
+                                    <td class="text-end">
+                                        <select class="form-select form-select-sm d-inline-block w-auto" onchange="showFlash('Technician assigned to ticket #TK-1085!')">
+                                            <option value="">-- Assign Tech --</option>
+                                            <option value="1">Kamrul Hasan (Hardware)</option>
+                                            <option value="2">Arif Chowdhury (Software)</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Lab Modal -->
+    <div class="modal fade" id="addLabModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form onsubmit="handleAddLab(event)">
+                    <div class="modal-header"><h5 class="modal-title fs-6">Add New Laboratory Room</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Room Number</label>
+                            <input type="text" id="new-lab-room" class="form-control" placeholder="e.g. Lab 609" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Capacity (Seats)</label>
+                            <input type="number" id="new-lab-cap" class="form-control" value="35" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-clrp btn-sm">Create Laboratory</button>
+                    </div>
+                </form>
             </div>
         </div>
-    <?php endif; ?>
+    </div>
 
-</main>
+    <!-- Add PC Modal -->
+    <div class="modal fade" id="addPCModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form onsubmit="handleAddPC(event)">
+                    <div class="modal-header"><h5 class="modal-title fs-6">Add Computer Workstation</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">PC Label</label>
+                            <input type="text" id="new-pc-label" class="form-control" placeholder="e.g. PC-605-15" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">IP Address</label>
+                            <input type="text" id="new-pc-ip" class="form-control" placeholder="192.168.1.115">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Lab Room</label>
+                            <select id="new-pc-lab" class="form-select" required>
+                                <option value="Lab 605">Lab 605</option>
+                                <option value="Lab 606">Lab 606</option>
+                                <option value="Lab 607">Lab 607</option>
+                                <option value="Lab 608">Lab 608</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-clrp btn-sm">Add Computer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+    <!-- Add Software Modal -->
+    <div class="modal fade" id="addSoftwareModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form onsubmit="handleAddSoftware(event)">
+                    <div class="modal-header"><h5 class="modal-title fs-6">Add Software Package</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Software Name</label>
+                            <input type="text" id="new-sw-name" class="form-control" placeholder="e.g. Python 3.12" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Version</label>
+                            <input type="text" id="new-sw-ver" class="form-control" placeholder="e.g. 3.12.2">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">License Type</label>
+                            <select id="new-sw-lic" class="form-select">
+                                <option value="Open Source">Open Source</option>
+                                <option value="Proprietary">Proprietary</option>
+                                <option value="Volume License">Volume License</option>
+                                <option value="Freeware">Freeware</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-clrp btn-sm">Add Software</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form onsubmit="handleAddUser(event)">
+                    <div class="modal-header"><h5 class="modal-title fs-6">Create User Account</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <select id="user-role-select" class="form-select" required>
+                                <option value="Student">Student</option>
+                                <option value="Technician">Technician</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="user-name-input" class="form-control" placeholder="Full Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="user-email-input" class="form-control" placeholder="name@northsouth.edu" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-clrp btn-sm">Create Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (['overview', 'labs', 'computers', 'software', 'users', 'reservations', 'maintenance'].includes(hash)) {
+                switchTab(hash);
+            }
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.sidebar-menu li a').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`tab-${tabId}`).classList.remove('d-none');
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+        }
+
+        function deleteRow(btn, name) {
+            if (confirm(`Delete ${name}?`)) {
+                btn.closest('tr').remove();
+                showFlash(`${name} removed successfully.`);
+            }
+        }
+
+        function handleAddLab(e) {
+            e.preventDefault();
+            const room = document.getElementById('new-lab-room').value;
+            const cap = document.getElementById('new-lab-cap').value;
+            bootstrap.Modal.getInstance(document.getElementById('addLabModal')).hide();
+
+            const tbody = document.getElementById('labs-table-body');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>#LAB-${Math.floor(Math.random()*100)}</td>
+                <td class="fw-semibold">${room}</td>
+                <td>${cap} Seats</td>
+                <td>0 PCs</td>
+                <td class="text-end">
+                    <button class="btn btn-outline-clrp btn-sm me-1">Edit</button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, '${room}')">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            showFlash(`${room} added to laboratory catalog!`);
+        }
+
+        function handleAddPC(e) {
+            e.preventDefault();
+            const label = document.getElementById('new-pc-label').value;
+            const ip = document.getElementById('new-pc-ip').value || '192.168.1.200';
+            const lab = document.getElementById('new-pc-lab').value;
+            bootstrap.Modal.getInstance(document.getElementById('addPCModal')).hide();
+
+            const tbody = document.getElementById('pcs-table-body');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>#PC-${Math.floor(Math.random()*900+100)}</td>
+                <td class="fw-semibold">${label}</td>
+                <td>${lab}</td>
+                <td><code>${ip}</code></td>
+                <td><span class="status-badge badge-available">Available</span></td>
+                <td class="text-end">
+                    <button class="btn btn-outline-clrp btn-sm me-1">Edit</button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, '${label}')">Delete</button>
+                </td>
+            `;
+            tbody.prepend(row);
+            const statPcs = document.getElementById('stat-pcs');
+            statPcs.innerText = parseInt(statPcs.innerText) + 1;
+            showFlash(`Workstation ${label} created under ${lab}.`);
+        }
+
+        function handleAddSoftware(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-sw-name').value;
+            const ver = document.getElementById('new-sw-ver').value || 'v1.0';
+            const lic = document.getElementById('new-sw-lic').value;
+            bootstrap.Modal.getInstance(document.getElementById('addSoftwareModal')).hide();
+
+            const tbody = document.getElementById('software-table-body');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>#SW-${Math.floor(Math.random()*100)}</td>
+                <td class="fw-semibold">${name}</td>
+                <td>${ver}</td>
+                <td><span class="badge bg-secondary-subtle text-secondary border px-2">${lic}</span></td>
+                <td>0 PCs</td>
+                <td class="text-end">
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRow(this, '${name}')">Delete</button>
+                </td>
+            `;
+            tbody.prepend(row);
+            showFlash(`Software ${name} (${ver}) added to catalog!`);
+        }
+
+        function handleLinkSoftware(e) {
+            e.preventDefault();
+            showFlash('Software application linked to selected computer workstation successfully!');
+        }
+
+        function handleAddUser(e) {
+            e.preventDefault();
+            const name = document.getElementById('user-name-input').value;
+            bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+            showFlash(`User account for ${name} created successfully.`);
+        }
+
+        function approveRes(btn) {
+            const row = btn.closest('tr');
+            row.cells[6].innerHTML = '<span class="status-badge badge-available">Approved</span>';
+            row.cells[7].innerHTML = '<span class="text-muted" style="font-size: 0.8rem;">Approved</span>';
+            showFlash('Student reservation request approved!');
+        }
+
+        function rejectRes(btn) {
+            const row = btn.closest('tr');
+            row.cells[6].innerHTML = '<span class="status-badge badge-maintenance">Rejected</span>';
+            row.cells[7].innerHTML = '<span class="text-muted" style="font-size: 0.8rem;">Rejected</span>';
+            showFlash('Student reservation request rejected.');
+        }
+
+        function showFlash(msg) {
+            const flash = document.getElementById('flash-alert');
+            document.getElementById('flash-msg').innerText = msg;
+            flash.classList.remove('d-none');
+            setTimeout(() => {
+                flash.classList.add('d-none');
+            }, 4000);
+        }
+    </script>
+</body>
+
+</html>

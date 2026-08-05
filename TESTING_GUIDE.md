@@ -1,73 +1,66 @@
-# CLRP Local Testing & Setup Guide
+# CLRP Testing & Deployment Guide (GitHub Pages Ready)
 
-This guide explains how to set up and run the **Computer Laboratory Resource Portal (CLRP)** on your local machine for development and testing.
-
----
-
-## Prerequisites
-
-To run this project, you need:
-1. **PHP** (v7.4 or higher recommended)
-2. **MySQL / MariaDB** server (e.g., via XAMPP, MAMP, Laragon, or standalone installation)
+This repository contains the **Computer Laboratory Resource Portal (CLRP)** formatted as **GitHub Pages Ready static HTML/CSS/JS** files inside the `views/` directory while preserving the exact modern dark glassmorphism design system.
 
 ---
 
-## Getting Started
+## 🚀 Live Demo & GitHub Pages Deployment
 
-### Step 1: Clone or Copy the Project
-Ensure the project files are located in your web server's root directory (e.g., `htdocs` for XAMPP, `www` for WAMP) or any local workspace directory.
-
-### Step 2: Configure Database Settings
-Open [config/db.php](file:///Users/tawhid/Desktop/Shan/CLRP-Computer-Lab-Booking-Portal/config/db.php) and adjust your database connection credentials if necessary:
-```php
-$host = '127.0.0.1';
-$dbname = 'clrp_db';
-$username = 'root'; // Change if your MySQL user is different
-$password = '';     // Change to your MySQL password
-```
-
-> [!NOTE]
-> **Auto-Provisioning Feature**: You do **not** need to manually create the database or run SQL scripts. When you run the application for the first time, it checks if `clrp_db` exists. If not, it automatically runs the [clrp.sql](file:///Users/tawhid/Desktop/Shan/CLRP-Computer-Lab-Booking-Portal/clrp.sql) schema and seeds it with default data.
-
-### Step 3: Run the Web Server
-
-#### Option A: Using the PHP Built-in Server (Recommended for Quick Testing)
-1. Open your terminal in the project root directory.
-2. Run the following command:
+### How to Enable GitHub Pages:
+1. Push your changes to GitHub:
    ```bash
-   php -S localhost:8000
+   git add .
+   git commit -m "Keep HTML views in views/ subfolder and update index.html links"
+   git push origin ui # or git push origin main
    ```
-3. Open your browser and navigate to `http://localhost:8000`.
-
-#### Option B: Using XAMPP / MAMP
-1. Move the project folder into your server's document root (e.g. `/Applications/XAMPP/xamppfiles/htdocs/` or `C:\xampp\htdocs\`).
-2. Start the **Apache** and **MySQL** services from the Control Panel.
-3. Open your browser and navigate to `http://localhost/CLRP-Computer-Lab-Booking-Portal`.
-
----
-
-## Test Accounts & Roles
-
-Once the portal is running, you can log in using any of the following seeded user credentials:
-
-### 1. System Administrator
-*   **Email**: `admin.sys@northsouth.edu`
-*   **Password**: `password123`
-*   **Use Cases**: Manage users, labs, computers, software catalog, map software, and approve/reject bookings.
-
-### 2. Lab Technician
-*   **Email**: `kamrul.hasan@northsouth.edu`
-*   **Password**: `password123`
-*   **Use Cases**: View maintenance queue, claim pending tickets, and update system repair statuses.
-
-### 3. Student
-*   **Email**: `abu.shan.241@northsouth.edu`
-*   **Password**: `password123`
-*   **Use Cases**: Browse lab computer availability, submit reservation requests, and file maintenance reports.
+2. On GitHub, navigate to **Settings** -> **Pages**.
+3. Under **Build and deployment**:
+   - **Source**: `Deploy from a branch`
+   - **Branch**: Select `main` (or `ui`) and folder `/ (root)`.
+4. Click **Save**. Your site will be live at `https://<your-username>.github.io/CLRP-Computer-Lab-Booking-Portal/`.
 
 ---
 
-## Verifying Features
+## 🖥️ Local Static Testing
 
-*   **Database connection**: If the page loads without SQL errors and shows the login interface, the connection is successful and the database has auto-seeded.
-*   **Role Redirect**: Logging in with any of the accounts above should redirect you to the corresponding dashboard ([admin/dashboard.php](file:///Users/tawhid/Desktop/Shan/CLRP-Computer-Lab-Booking-Portal/admin/dashboard.php), [technician/dashboard.php](file:///Users/tawhid/Desktop/Shan/CLRP-Computer-Lab-Booking-Portal/technician/dashboard.php), or [student/dashboard.php](file:///Users/tawhid/Desktop/Shan/CLRP-Computer-Lab-Booking-Portal/student/dashboard.php)).
+You can open [index.html](file:///Users/salehinshan/Desktop/CLRP-Computer-Lab-Booking-Portal/index.html) directly in any web browser or use a simple local web server:
+
+### Option A: Open directly in Browser
+Double-click [index.html](file:///Users/salehinshan/Desktop/CLRP-Computer-Lab-Booking-Portal/index.html) or drag it into Chrome/Firefox/Safari.
+
+### Option B: Local HTTP Server (Python / Node)
+```bash
+# Python 3
+python3 -m http.server 8000
+
+# Node / npx
+npx serve .
+```
+Navigate to `http://localhost:8000`.
+
+---
+
+## 🔑 Demo Accounts & Portals
+
+The portal provides 1-click quick login & auto-fill demo accounts:
+
+### 1. System Administrator Portal
+*   **Direct View Page**: [views/admin/dashboard.html](file:///Users/salehinshan/Desktop/CLRP-Computer-Lab-Booking-Portal/views/admin/dashboard.html)
+*   **Login Email**: `admin.sys@northsouth.edu`
+*   **Features**: System stats overview, manage lab rooms, workstations inventory, software catalog mapping, user directory, student reservation approvals, technician ticket assignment.
+
+### 2. Lab Technician Workspace
+*   **Direct View Page**: [views/technician/dashboard.html](file:///Users/salehinshan/Desktop/CLRP-Computer-Lab-Booking-Portal/views/technician/dashboard.html)
+*   **Login Email**: `kamrul.hasan@northsouth.edu`
+*   **Features**: Assigned maintenance ticket queue, filter by unassigned/my tickets, ticket status update & resolution modal, historical ticket logs.
+
+### 3. Student Portal
+*   **Direct View Page**: [views/student/dashboard.html](file:///Users/salehinshan/Desktop/CLRP-Computer-Lab-Booking-Portal/views/student/dashboard.html)
+*   **Login Email**: `abu.shan.241@northsouth.edu`
+*   **Features**: Filter lab workstations by room or installed software, PC reservation modal, manage my bookings, file hardware/software issue reports.
+
+---
+
+## 🎨 UI & Design Highlights
+*   **Theme**: Dark Mode with Glassmorphism blur effects (`Plus Jakarta Sans` typography, vibrant HSL gradients & glow).
+*   **Interactivity**: Client-side tab switching, live filtering, dynamic stat counter updates, modal dialogs, and toast notifications.
