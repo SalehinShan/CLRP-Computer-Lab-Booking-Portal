@@ -532,36 +532,6 @@ body {
   margin: 0;
 }
 
-.demo-accounts-box {
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 0.6rem;
-  padding: 0.85rem 1rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.demo-acc-item {
-  margin-bottom: 0.25rem;
-  font-size: 0.775rem;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.35rem;
-  transition: all 0.2s ease;
-}
-
-.demo-acc-item:hover {
-  background: rgba(99, 102, 241, 0.15);
-  color: #fff;
-}
-
-.demo-acc-item code {
-  background: rgba(99, 102, 241, 0.15);
-  color: #a5b4fc;
-  padding: 0.15rem 0.35rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-}
-
 /* Form Controls Dark Theme */
 .form-label {
   font-size: 0.85rem;
