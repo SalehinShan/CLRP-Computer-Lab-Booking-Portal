@@ -11,6 +11,12 @@ require_once __DIR__ . '/../../includes/sidebar.php';
             <h2>Technician Workspace</h2>
             <p>Welcome back, <?= e($user['name']) ?> (Specialization: <?= e($user['extra'] ?? 'General Maintenance') ?>)</p>
         </div>
+        <div>
+            <button type="button" class="theme-toggle-btn" title="Switch Theme">
+                <i class="bi bi-sun-fill theme-icon"></i>
+                <span class="theme-label">Light Mode</span>
+            </button>
+        </div>
     </div>
 
     <?php if ($flash): ?>

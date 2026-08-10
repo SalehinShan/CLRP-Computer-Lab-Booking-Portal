@@ -2,10 +2,50 @@
 // includes/auth.php - Session Management, Security & RBAC Enforcement
 
 if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 
 require_once __DIR__ . '/../config/db.php';
+
+// Helper to get or generate a server instance ID tied to the current running server process
+function get_server_instance_id() {
+    static $server_instance_id = null;
+    if ($server_instance_id !== null) {
+        return $server_instance_id;
+    }
+
+    $pid = getmypid();
+    $file = sys_get_temp_dir() . '/clrp_server_instance.json';
+
+    if (file_exists($file)) {
+        $content = @file_get_contents($file);
+        $data = @json_decode($content, true);
+        if (is_array($data) && isset($data['pid']) && isset($data['server_id'])) {
+            if ($data['pid'] === $pid) {
+                $server_instance_id = $data['server_id'];
+                return $server_instance_id;
+            }
+        }
+    }
+
+    $server_instance_id = bin2hex(random_bytes(16));
+    $newData = [
+        'pid' => $pid,
+        'server_id' => $server_instance_id,
+        'created_at' => time()
+    ];
+    @file_put_contents($file, json_encode($newData));
+
+    return $server_instance_id;
+}
 
 // Dynamic URL helper for root or subfolder deployments
 function url($path = '') {
@@ -69,7 +109,27 @@ function get_flash() {
 
 // Check if user is logged in
 function is_logged_in() {
-    return isset($_SESSION['user_id']) && isset($_SESSION['role']);
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+        return false;
+    }
+    
+    // Verify session belongs to the current running server process
+    if (!isset($_SESSION['server_instance_id']) || $_SESSION['server_instance_id'] !== get_server_instance_id()) {
+        $_SESSION = array();
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+        return false;
+    }
+
+    return true;
 }
 
 // Get logged-in user info

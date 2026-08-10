@@ -11,6 +11,12 @@ if (!defined('PAGE_TITLE')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e(PAGE_TITLE) ?></title>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('clrp_theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        })();
+    </script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +27,8 @@ if (!defined('PAGE_TITLE')) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= url('/assets/css/custom.css') ?>">
+    <!-- Theme JS -->
+    <script src="<?= url('/assets/js/theme.js') ?>" defer></script>
 </head>
 <body>
 <div class="app-wrapper">

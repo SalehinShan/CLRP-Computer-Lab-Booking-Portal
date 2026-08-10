@@ -86,9 +86,14 @@ $active_tab = $active_tab ?? 'overview';
                 <div class="user-name" title="<?= e($user['name']) ?>"><?= e($user['name']) ?></div>
                 <div class="user-role"><?= e(ucfirst($role)) ?> <?= $user['extra'] ? '('.e($user['extra']).')' : '' ?></div>
             </div>
-            <a href="<?= url('/logout.php') ?>" class="btn-logout" title="Sign Out">
-                <i class="bi bi-box-arrow-right"></i>
-            </a>
+            <div class="d-flex align-items-center gap-1">
+                <button type="button" class="theme-toggle-btn sidebar-theme-toggle" title="Switch Theme">
+                    <i class="bi bi-sun-fill theme-icon"></i>
+                </button>
+                <a href="<?= url('/logout.php') ?>" class="btn-logout" title="Sign Out">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
         </div>
     </div>
 </aside>

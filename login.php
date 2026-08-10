@@ -73,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($db_connection_error)) {
                 $_SESSION['user_email'] = $user_data['email'];
                 $_SESSION['role'] = $role_assigned;
                 $_SESSION['user_extra'] = $user_data['extra'];
+                $_SESSION['server_instance_id'] = get_server_instance_id();
 
                 set_flash('success', "Welcome back, " . $user_data['name'] . "!");
                 session_write_close();

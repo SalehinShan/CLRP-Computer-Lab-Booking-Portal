@@ -129,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($db_connection_error)) {
                     $_SESSION['user_email'] = $email;
                     $_SESSION['role'] = $role;
                     $_SESSION['user_extra'] = ($role === 'student') ? $dept_id : (($role === 'technician') ? $specialization : null);
+                    $_SESSION['server_instance_id'] = get_server_instance_id();
 
                     set_flash('success', "Account created successfully! Welcome to the portal, {$name}.");
                     session_write_close();
