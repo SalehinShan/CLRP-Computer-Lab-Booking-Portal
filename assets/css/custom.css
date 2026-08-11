@@ -438,6 +438,55 @@ body {
   background-color: rgba(99, 102, 241, 0.06);
 }
 
+/* Scrollable Table Viewport */
+.table-scrollable {
+  max-height: 540px;
+  overflow-y: auto;
+  overflow-x: auto;
+  --scrollbar-thumb: rgba(99, 102, 241, 0.4);
+  --scrollbar-track: rgba(15, 23, 42, 0.2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.table-scrollable:hover {
+  --scrollbar-thumb: rgba(99, 102, 241, 0.7);
+}
+
+.table-scrollable .table-custom th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 0 var(--border-color);
+}
+
+[data-bs-theme="light"] .table-scrollable {
+  --scrollbar-thumb: rgba(99, 102, 241, 0.3);
+  --scrollbar-track: rgba(0, 0, 0, 0.03);
+}
+
+[data-bs-theme="light"] .table-scrollable:hover {
+  --scrollbar-thumb: rgba(99, 102, 241, 0.6);
+}
+
+[data-bs-theme="light"] .table-scrollable .table-custom th {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+@supports not (scrollbar-color: auto) {
+  .table-scrollable::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .table-scrollable::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+  .table-scrollable::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+}
+
 /* Cards & Content Containers */
 .content-card {
   background: var(--bg-card);
