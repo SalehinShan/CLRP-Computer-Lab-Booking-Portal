@@ -171,34 +171,41 @@ require_once __DIR__ . '/../../includes/sidebar.php';
                                 </td>
                             </tr>
 
-                            <!-- Edit Lab Modal -->
-                            <div class="modal fade" id="editLabModal<?= $lab['lab_id'] ?>" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="edit_lab">
-                                            <input type="hidden" name="lab_id" value="<?= $lab['lab_id'] ?>">
-                                            <div class="modal-header"><h5 class="modal-title fs-6">Edit Lab Room #<?= $lab['lab_id'] ?></h5></div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Room Number</label>
-                                                    <input type="text" name="room_number" class="form-control" value="<?= e($lab['room_number']) ?>" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Seating Capacity</label>
-                                                    <input type="number" name="capacity" class="form-control" value="<?= $lab['capacity'] ?>" required>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
-                                            </div>
-                                        </form>
-                                    </div>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Render Edit Lab modals outside the table to avoid invalid nesting -->
+        <?php foreach ($labs as $lab): ?>
+            <div class="modal fade" id="editLabModal<?= $lab['lab_id'] ?>" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="<?= url('/admin/dashboard.php?tab=labs') ?>" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                            <input type="hidden" name="action" value="edit_lab">
+                            <input type="hidden" name="lab_id" value="<?= $lab['lab_id'] ?>">
+                            <div class="modal-header"><h5 class="modal-title fs-6">Edit Lab Room #<?= $lab['lab_id'] ?></h5></div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Room Number</label>
+                                    <input type="text" name="room_number" class="form-control" value="<?= e($lab['room_number']) ?>" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Seating Capacity</label>
+                                    <input type="number" name="capacity" class="form-control" value="<?= $lab['capacity'] ?>" required>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
@@ -272,55 +279,58 @@ require_once __DIR__ . '/../../includes/sidebar.php';
                                 </td>
                             </tr>
 
-                            <!-- Edit PC Modal -->
-                            <div class="modal fade" id="editPCModal<?= $pc['computer_id'] ?>" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST">
-                                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                                            <input type="hidden" name="action" value="edit_computer">
-                                            <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
-                                            <div class="modal-header"><h5 class="modal-title fs-6">Edit PC - <?= e($pc['pc_label']) ?></h5></div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">PC Label</label>
-                                                    <input type="text" name="pc_label" class="form-control" value="<?= e($pc['pc_label']) ?>" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">IP Address</label>
-                                                    <input type="text" name="ip_address" class="form-control" value="<?= e($pc['ip_address']) ?>">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Assigned Lab Room</label>
-                                                    <select name="lab_id" class="form-select" required>
-                                                        <?php foreach ($labs as $l): ?>
-                                                            <option value="<?= $l['lab_id'] ?>" <?= $pc['lab_id'] == $l['lab_id'] ? 'selected' : '' ?>><?= e($l['room_number']) ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Operating Status</label>
-                                                    <select name="status" class="form-select" required>
-                                                        <option value="Available" <?= $pc['status'] === 'Available' ? 'selected' : '' ?>>Available</option>
-                                                        <option value="In Use" <?= $pc['status'] === 'In Use' ? 'selected' : '' ?>>In Use</option>
-                                                        <option value="Reserved" <?= $pc['status'] === 'Reserved' ? 'selected' : '' ?>>Reserved</option>
-                                                        <option value="Under Maintenance" <?= $pc['status'] === 'Under Maintenance' ? 'selected' : '' ?>>Under Maintenance</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Render Edit PC modals outside the table to avoid invalid nesting -->
+        <?php foreach ($computers as $pc): ?>
+            <div class="modal fade" id="editPCModal<?= $pc['computer_id'] ?>" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="<?= url('/admin/dashboard.php?tab=computers') ?>" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                            <input type="hidden" name="action" value="edit_computer">
+                            <input type="hidden" name="computer_id" value="<?= $pc['computer_id'] ?>">
+                            <div class="modal-header"><h5 class="modal-title fs-6">Edit PC - <?= e($pc['pc_label']) ?></h5></div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">PC Label</label>
+                                    <input type="text" name="pc_label" class="form-control" value="<?= e($pc['pc_label']) ?>" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">IP Address</label>
+                                    <input type="text" name="ip_address" class="form-control" value="<?= e($pc['ip_address']) ?>">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Assigned Lab Room</label>
+                                    <select name="lab_id" class="form-select" required>
+                                        <?php foreach ($labs as $l): ?>
+                                            <option value="<?= $l['lab_id'] ?>" <?= $pc['lab_id'] == $l['lab_id'] ? 'selected' : '' ?>><?= e($l['room_number']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Operating Status</label>
+                                    <select name="status" class="form-select" required>
+                                        <option value="Available" <?= $pc['status'] === 'Available' ? 'selected' : '' ?>>Available</option>
+                                        <option value="In Use" <?= $pc['status'] === 'In Use' ? 'selected' : '' ?>>In Use</option>
+                                        <option value="Reserved" <?= $pc['status'] === 'Reserved' ? 'selected' : '' ?>>Reserved</option>
+                                        <option value="Under Maintenance" <?= $pc['status'] === 'Under Maintenance' ? 'selected' : '' ?>>Under Maintenance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-clrp btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary-clrp btn-sm">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
 
         <!-- Add PC Modal -->
         <div class="modal fade" id="addPCModal" tabindex="-1">
