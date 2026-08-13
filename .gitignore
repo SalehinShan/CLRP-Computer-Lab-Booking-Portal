@@ -20,3 +20,6 @@ composer.lock
 error_log
 access_log
 *.log
+
+# Environment file containing secrets - do NOT commit
+.env
