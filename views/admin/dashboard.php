@@ -1,5 +1,5 @@
 <?php
-// views/admin/dashboard.html - Admin Dashboard View Template
+// views/admin/dashboard.php - Admin Dashboard View Template
 
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
@@ -204,12 +204,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
                         </form>
                     </div>
                 </div>
-            </div>
         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
         <!-- Add Lab Modal -->
         <div class="modal fade" id="addLabModal" tabindex="-1">

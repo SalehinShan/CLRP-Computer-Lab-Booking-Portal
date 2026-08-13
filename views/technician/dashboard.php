@@ -1,5 +1,5 @@
 <?php
-// views/technician/dashboard.html - Technician Dashboard View Template
+// views/technician/dashboard.php - Technician Dashboard View Template
 
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';

@@ -101,4 +101,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($db_connection_error)) {
 }
 
 // Render Login View HTML
-require_once __DIR__ . '/views/login.html';
+require_once __DIR__ . '/views/login.php';

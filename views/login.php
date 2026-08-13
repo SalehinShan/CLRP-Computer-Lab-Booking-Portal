@@ -1,5 +1,5 @@
 <?php
-// views/login.html - Login HTML View Template
+// views/login.php - Login HTML View Template
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">

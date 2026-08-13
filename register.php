@@ -156,4 +156,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($db_connection_error)) {
 }
 
 // Render Registration HTML View
-require_once __DIR__ . '/views/register.html';
+require_once __DIR__ . '/views/register.php';

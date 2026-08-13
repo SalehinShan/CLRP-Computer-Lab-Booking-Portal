@@ -158,5 +158,5 @@ foreach ($bookedRows as $row) {
     $bookedSlotsMap[$cid][$rdate][] = $tslot;
 }
 
-// Render View
-require_once __DIR__ . '/../views/student/dashboard.html';
+// Render View HTML
+require_once __DIR__ . '/../views/student/dashboard.php';

@@ -99,4 +99,4 @@ if ($tab === 'history') {
 $queue_tickets = $pdo->query($sqlQueue)->fetchAll();
 
 // Render View
-require_once __DIR__ . '/../views/technician/dashboard.html';
+require_once __DIR__ . '/../views/technician/dashboard.php';

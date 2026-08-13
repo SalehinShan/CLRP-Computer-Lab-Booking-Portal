@@ -1,5 +1,5 @@
 <?php
-// views/register.html - User Registration View Template
+// views/register.php - User Registration View Template
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">

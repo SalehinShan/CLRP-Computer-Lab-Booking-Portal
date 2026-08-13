@@ -275,5 +275,5 @@ $maintenance_tickets = $pdo->query("
     ORDER BY m.reported_at DESC
 ")->fetchAll();
 
-// Render View
-require_once __DIR__ . '/../views/admin/dashboard.html';
+// Render Admin Dashboard View
+require_once __DIR__ . '/../views/admin/dashboard.php';
